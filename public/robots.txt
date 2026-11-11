@@ -1,0 +1,105 @@
+# ==============================================================================
+# SIGNATURE AURA DEVELOPERS (SIGNATURE AURA PVT. LTD.) - ROBOTS.TXT
+# Standard: Modern 2026 AI Search & Crawler Governance Protocol
+# Canonical Domain: https://signatureaura.com
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. STANDARD GLOBAL SEARCH ENGINES
+# ------------------------------------------------------------------------------
+User-agent: Googlebot
+User-agent: Googlebot-Image
+User-agent: Googlebot-Mobile
+User-agent: Bingbot
+User-agent: DuckDuckGo
+User-agent: Slurp
+User-agent: Yandex
+User-agent: Baiduspider
+User-agent: Qwantify
+Allow: /
+Allow: /properties
+Allow: /properties/*
+Allow: /projects
+Allow: /projects/*
+Allow: /locations
+Allow: /locations/*
+Allow: /about
+Allow: /services
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-and-conditions
+Allow: /assets/
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /api/*
+
+# ------------------------------------------------------------------------------
+# 2. GENERATIVE SEARCH ENGINES, ANSWER ENGINES (AEO) & AI CRAWLERS (WHITELISTED)
+# ------------------------------------------------------------------------------
+User-agent: Google-Extended
+User-agent: Gemini
+User-agent: VertexBot
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: OAI-SearchBot
+User-agent: ClaudeBot
+User-agent: Claude-Web
+User-agent: anthropic-ai
+User-agent: PerplexityBot
+User-agent: GrokBot
+User-agent: xAI
+User-agent: Applebot
+User-agent: Applebot-Extended
+User-agent: Amazonbot
+User-agent: cohere-ai
+User-agent: Meta-ExternalAgent
+User-agent: Bytespider
+User-agent: YouBot
+User-agent: DuckAssistBot
+Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /properties/*
+Allow: /projects/*
+Allow: /locations/*
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /api/*
+
+# ------------------------------------------------------------------------------
+# 3. AGGRESSIVE SPAM, SEO SCRAPERS & BACKLINK HARVESTERS (BLOCKED)
+# ------------------------------------------------------------------------------
+User-agent: AhrefsBot
+User-agent: SemrushBot
+User-agent: SemrushBot-SA
+User-agent: MJ12bot
+User-agent: DotBot
+User-agent: PetalBot
+User-agent: BLEXBot
+User-agent: DataForSeoBot
+User-agent: Rogerbot
+User-agent: MegaIndex
+User-agent: Spinn3r
+Disallow: /
+
+# ------------------------------------------------------------------------------
+# 4. DEFAULT CRAWLER POLICY
+# ------------------------------------------------------------------------------
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /api/*
+
+# ------------------------------------------------------------------------------
+# 5. SITEMAPS & AI KNOWLEDGE DIRECTIVES
+# ------------------------------------------------------------------------------
+Sitemap: https://signatureaura.com/sitemap.xml
+
+# LLM / AEO Knowledge Graph manifests
+# See https://llmstxt.org specification
+# Alternate: https://signatureaura.com/llms.txt
+# Alternate: https://signatureaura.com/llms-full.txt

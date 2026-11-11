@@ -1,0 +1,12 @@
+node_modules/
+.next/
+coverage/
+.DS_Store
+.aistudio/
+*.log
+*.tsbuildinfo
+data/*.db
+data/*.db-wal
+data/*.db-shm
+.env*
+!.env.example

@@ -1,0 +1,8 @@
+{
+  "name": "Signature Aura project",
+  "description": "Premier real estate advisory and luxury properties in India. Discover bespoke residential apartments, luxury villas, commercial spaces, and curated penthouses with AI property assistance.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
