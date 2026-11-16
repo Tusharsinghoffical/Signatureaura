@@ -125,13 +125,9 @@ export default function FloatingContactSystem() {
             <button
               onClick={() => setIsChatModalOpen(true)}
               aria-label="Ask AI Property Assistant"
-              className="touch-manipulation w-13 h-13 min-w-[52px] min-h-[52px] rounded-full bg-[#171717] hover:bg-[#222222] text-[#B99A63] hover:text-[#D4AF37] flex items-center justify-center shadow-xl border-2 border-[#B99A63] hover:scale-105 transition-all relative active:scale-95 group/btn"
+              className="touch-manipulation w-13 h-13 min-w-[52px] min-h-[52px] rounded-full bg-[#171717] hover:bg-[#222222] text-[#B99A63] hover:text-[#D4AF37] flex items-center justify-center shadow-xl border border-[#B99A63]/80 hover:border-[#E8D39E] hover:scale-105 transition-all relative active:scale-95 group/btn"
             >
               <BotMessageSquare className="w-6 h-6 text-[#E8D39E] group-hover/btn:scale-110 transition-transform" />
-              <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B99A63] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#B99A63] border-2 border-[#171717]"></span>
-              </span>
             </button>
           </div>
 
@@ -198,13 +194,9 @@ export default function FloatingContactSystem() {
           <button
             onClick={() => setIsChatModalOpen(true)}
             aria-label="Open AI property assistant"
-            className="touch-manipulation w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-[#171717] hover:bg-[#222222] border-2 border-[#B99A63] text-white flex items-center justify-center shadow-2xl active:scale-95 transition-transform relative"
+            className="touch-manipulation w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-[#171717] hover:bg-[#222222] border border-[#B99A63]/80 text-white flex items-center justify-center shadow-2xl active:scale-95 transition-transform relative"
           >
             <BotMessageSquare className="w-5 h-5 text-[#E8D39E]" />
-            <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B99A63] opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-[#B99A63] border border-[#171717]"></span>
-            </span>
           </button>
 
           {/* Quick Callback Trigger */}

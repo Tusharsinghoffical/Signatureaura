@@ -107,11 +107,10 @@ const STATIC_KNOWLEDGE: KnowledgeChunk[] = [
     title: 'Marquee Landmark Developments & New Launches',
     category: 'Project',
     url: '/projects',
-    content: `Signature Aura represents marquee residential and commercial developments:
-1. The Aurelia Reserve (Worli Sea Face, Mumbai): Ultra-luxury 4 & 5 BHK Sky Mansions with Arabian Sea panoramas, designed by Foster + Partners. Handover Q4 2027 (MahaRERA: P51900034891).
-2. The Heritage Pines (Assagao, North Goa): Gated enclave of 12 private Portuguese heritage estates with private pools, teakwood ceilings, and bespoke concierge (Goa RERA: PRGO08211470).
-3. Solitaire Towers (Golf Course Ext. Road, Gurgaon): Grade-A LEED Gold corporate office plates & luxury sky suites (HRERA: HRERA-GGM-112-2023).`,
-    tags: ['projects', 'developments', 'aurelia', 'heritage pines', 'solitaire', 'worli', 'goa', 'gurgaon', 'new launch']
+    content: `Signature Aura represents flagship residential developments:
+1. Signature Aura Baner (Baner, Pune): Modern 2 BHK residences starting ₹ 55 Lakh onwards near Nanaware Bridge & Baner High Street. Handover Q4 2026 (MahaRERA: P52100049218).
+2. Aura Sky Mumbai (Western Suburbs / Malad-Kandivali Link Corridor, Mumbai): High-rise luxury residences starting ₹ 85 Lakh onwards with panoramic sea-breeze vistas. Handover Q2 2027 (MahaRERA: P51800052341).`,
+    tags: ['projects', 'developments', 'signature aura baner', 'aura sky', 'baner', 'pune', 'mumbai', 'new launch', '2 bhk']
   }
 ];
 
@@ -285,8 +284,8 @@ Prime Localities: ${loc.popularLocalities.join(', ')}`,
     suggestedFollowUps.push('Show all properties in Baner-Sus Pune');
     suggestedFollowUps.push('Connect with Partner Rakesh Desale Patil');
   } else if (queryLower.includes('worli') || queryLower.includes('mumbai')) {
-    suggestedFollowUps.push('What are the sea-facing penthouses in Worli?');
-    suggestedFollowUps.push('Tell me about The Aurelia Reserve project');
+    suggestedFollowUps.push('Tell me about Aura Sky Mumbai starting ₹ 85 Lakh');
+    suggestedFollowUps.push('What sea-facing penthouses are available in Worli?');
   } else if (queryLower.includes('goa')) {
     suggestedFollowUps.push('Show private villas in Assagao & Candolim');
   } else {

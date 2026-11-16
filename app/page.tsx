@@ -192,6 +192,7 @@ export default function HomePage() {
                   src="/assets/branding/signature-aura-logo-official.png?v=20261105"
                   alt="Signature Aura Developers Emblem"
                   fill
+                  sizes="32px"
                   className="object-contain"
                   priority
                 />
