@@ -4,7 +4,7 @@ import Script from 'next/script';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import './globals.css';
-import { BUSINESS_CONFIG } from '@/lib/config';
+import { BUSINESS_CONFIG, getSiteUrl } from '@/lib/config';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -25,9 +25,7 @@ const plusJakarta = Plus_Jakarta_Sans({
   display: 'swap',
 });
 
-const BASE_URL = process.env.APP_URL && process.env.APP_URL !== 'MY_APP_URL'
-  ? process.env.APP_URL.replace(/\/$/, '')
-  : 'https://signatureaura.com';
+const BASE_URL = getSiteUrl();
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),

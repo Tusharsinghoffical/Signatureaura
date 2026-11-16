@@ -131,6 +131,17 @@ export interface SiteVisit {
   createdAt: string;
 }
 
+export interface ConstructionWorkUpdate {
+  id: string;
+  title: string;
+  category: 'construction' | 'masonry' | 'civil_inspection' | 'elevation' | 'amenities';
+  stage: string;
+  date: string;
+  description: string;
+  imageUrl: string;
+  badge: string;
+}
+
 export interface ProjectDevelopment {
   id: string;
   slug: string;
@@ -146,6 +157,13 @@ export interface ProjectDevelopment {
   reraNumber: string;
   heroImage: string;
   galleryImages: string[];
+  constructionGallery?: ConstructionWorkUpdate[];
+  constructionMilestones?: {
+    stage: string;
+    progressPercentage: number;
+    targetDate: string;
+    status: 'Completed' | 'In Progress' | 'Upcoming';
+  }[];
   overview: string;
   highlights: string[];
   brochureUrl?: string;

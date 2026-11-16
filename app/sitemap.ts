@@ -1,9 +1,8 @@
 import { MetadataRoute } from 'next';
 import { SAMPLE_PROPERTIES, SAMPLE_PROJECTS, SAMPLE_LOCATIONS } from '@/lib/data/sample-data';
+import { getSiteUrl } from '@/lib/config';
 
-const BASE_URL = process.env.APP_URL && process.env.APP_URL !== 'MY_APP_URL'
-  ? process.env.APP_URL.replace(/\/$/, '')
-  : 'https://signatureaura.com';
+const BASE_URL = getSiteUrl();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const currentDate = new Date().toISOString();

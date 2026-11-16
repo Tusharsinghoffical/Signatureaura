@@ -104,3 +104,27 @@ export function redirectToWhatsApp(url: string) {
     window.location.href = url;
   }
 }
+
+export function getSiteUrl(): string {
+  const publicUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (publicUrl && publicUrl !== 'MY_APP_URL') {
+    return publicUrl.replace(/\/$/, '');
+  }
+
+  const appUrl = process.env.APP_URL?.trim();
+  if (appUrl && appUrl !== 'MY_APP_URL') {
+    return appUrl.replace(/\/$/, '');
+  }
+
+  const vercelProdUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (vercelProdUrl) {
+    return `https://${vercelProdUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+  }
+
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+  if (vercelUrl) {
+    return `https://${vercelUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}`;
+  }
+
+  return 'https://signatureaura.com';
+}

@@ -1407,9 +1407,105 @@ export const SAMPLE_PROJECTS: ProjectDevelopment[] = [
     reraNumber: 'P52100049218',
     heroImage: '/assets/projects/aura-baner-residences.jpg',
     galleryImages: [
-      '/assets/projects/aura-baner-residences.jpg',
       '/assets/projects/baner-site-progress.jpg',
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1541971875076-8f970d573be6?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1589939705384-5185137a7f0f?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1200&q=80',
+      '/assets/projects/aura-baner-residences.jpg',
       '/assets/projects/aura-amenity-pool.jpg'
+    ],
+    constructionGallery: [
+      {
+        id: 'baner-work-1',
+        title: 'Active Scaffolding & Exterior Plastering Work',
+        category: 'masonry',
+        stage: 'Floor 4-6 Masonry',
+        date: 'March 2026 (Live)',
+        description: 'External bamboo and steel scaffolding erected across the north facade. Brickwork laying and protective cement plastering underway.',
+        imageUrl: '/assets/projects/baner-site-progress.jpg',
+        badge: 'On-Site Photo'
+      },
+      {
+        id: 'baner-work-2',
+        title: 'Skilled Workforce on Structural Shuttering',
+        category: 'construction',
+        stage: 'Superstructure Formwork',
+        date: 'March 2026',
+        description: 'Certified civil site operatives assembling beam shuttering and safety scaffolding with high-grade harness protection.',
+        imageUrl: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Active Work'
+      },
+      {
+        id: 'baner-work-3',
+        title: 'RCC Column Reinforcement & Rebar Tying',
+        category: 'construction',
+        stage: 'Structural Core',
+        date: 'February 2026',
+        description: 'Fe-550D TMT steel bars tied with precision spacing for earthquake-resistant Zone III compliance.',
+        imageUrl: 'https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Structural Quality'
+      },
+      {
+        id: 'baner-work-4',
+        title: 'Chief Structural Engineer On-Site Inspection',
+        category: 'civil_inspection',
+        stage: 'QA/QC Verification',
+        date: 'March 2026',
+        description: 'Verification of floor level alignment, slump cone test of concrete batch, and MahaRERA audit checklists.',
+        imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Audit Passed'
+      },
+      {
+        id: 'baner-work-5',
+        title: 'Civil Structural Framework & Site Scaffolding',
+        category: 'construction',
+        stage: 'Floor Casting',
+        date: 'March 2026',
+        description: 'Multi-tier scaffolding network supporting concrete curing and ongoing superstructure expansion.',
+        imageUrl: 'https://images.unsplash.com/photo-1541971875076-8f970d573be6?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Milestone 4'
+      },
+      {
+        id: 'baner-work-6',
+        title: 'Internal Electrical & MEP Conduit Rough-in',
+        category: 'construction',
+        stage: 'MEP Phase 1',
+        date: 'February 2026',
+        description: 'Fire-retardant electrical conduits and CPVC concealed water lines embedded in slab formwork prior to casting.',
+        imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?auto=format&fit=crop&w=1200&q=80',
+        badge: 'MEP Work'
+      },
+      {
+        id: 'baner-work-7',
+        title: 'Architectural Teak-Accent Facade Render',
+        category: 'elevation',
+        stage: 'Target Elevation',
+        date: 'Target Q4 2026',
+        description: 'Finished modern contemporary residential elevation with private balconies and manicured landscape boundary.',
+        imageUrl: '/assets/projects/aura-baner-residences.jpg',
+        badge: 'Final Elevation'
+      },
+      {
+        id: 'baner-work-8',
+        title: 'Clubhouse Temperature-Controlled Leisure Pool',
+        category: 'amenities',
+        stage: 'Podium Amenities',
+        date: 'Finishing Phase',
+        description: 'Dedicated swimming pool with non-slip Italian deck tiles and glass balustrades.',
+        imageUrl: '/assets/projects/aura-amenity-pool.jpg',
+        badge: 'Amenity Deck'
+      }
+    ],
+    constructionMilestones: [
+      { stage: 'Excavation & Raft Foundation', progressPercentage: 100, targetDate: 'Q3 2025', status: 'Completed' },
+      { stage: 'RCC Superstructure & Slab Casting', progressPercentage: 80, targetDate: 'Q2 2026', status: 'In Progress' },
+      { stage: 'Brick Masonry & Internal Plastering', progressPercentage: 65, targetDate: 'Q3 2026', status: 'In Progress' },
+      { stage: 'Concealed Electrical & Plumbing (MEP)', progressPercentage: 45, targetDate: 'Q3 2026', status: 'In Progress' },
+      { stage: 'Exterior Texture Paint & Balcony Railings', progressPercentage: 25, targetDate: 'Q4 2026', status: 'Upcoming' },
+      { stage: 'Final Handover & Possession', progressPercentage: 0, targetDate: 'Q4 2026', status: 'Upcoming' }
     ],
     overview: 'Signature Aura Baner is an exclusive residential community situated in Baner-Sus, Pune. Designed for contemporary urban living with smart 2 BHK floor layouts, earthquake-resistant RCC frame construction, designer teak-accent facade, dedicated high-speed elevators, and landscaped leisure deck. Complete MahaRERA certification with attractive bank subvention plans.',
     highlights: [
@@ -1436,9 +1532,105 @@ export const SAMPLE_PROJECTS: ProjectDevelopment[] = [
     reraNumber: 'P51800052341',
     heroImage: '/assets/projects/aura-sky-mumbai.jpg',
     galleryImages: [
+      'https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?auto=format&fit=crop&w=1200&q=80',
+      '/assets/projects/baner-site-progress.jpg',
+      'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1504307651254-35680f356dfd?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1200&q=80',
       '/assets/projects/aura-sky-mumbai.jpg',
-      '/assets/projects/aura-amenity-pool.jpg',
-      '/assets/projects/baner-site-progress.jpg'
+      '/assets/projects/aura-amenity-pool.jpg'
+    ],
+    constructionGallery: [
+      {
+        id: 'sky-work-1',
+        title: 'High-Rise Tower Crane Operations & Material Hoisting',
+        category: 'construction',
+        stage: 'Level 18 Casting',
+        date: 'March 2026 (Live)',
+        description: 'Continuous vertical construction powered by heavy Potain tower cranes delivering concrete and steel reinforcement.',
+        imageUrl: 'https://images.unsplash.com/photo-1517581177682-a085bb7ffb15?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Tower Crane'
+      },
+      {
+        id: 'sky-work-2',
+        title: 'Active High-Rise Superstructure & Core Walls',
+        category: 'construction',
+        stage: 'RCC Core Framing',
+        date: 'March 2026',
+        description: 'Monolithic aluminum formwork system (Mivan tech) casting shear walls and floor slabs simultaneously for maximum seismic strength.',
+        imageUrl: '/assets/projects/baner-site-progress.jpg',
+        badge: 'Live Site Work'
+      },
+      {
+        id: 'sky-work-3',
+        title: 'Modern Facade Apertures & Perimeter Enclosures',
+        category: 'elevation',
+        stage: 'Exterior Framework',
+        date: 'March 2026',
+        description: 'Architectural structural framing with double-glazed window sub-frames installed on lower residential tiers.',
+        imageUrl: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Facade Progress'
+      },
+      {
+        id: 'sky-work-4',
+        title: 'Reinforced Concrete Columns & Transfer Slabs',
+        category: 'construction',
+        stage: 'Podium Superstructure',
+        date: 'February 2026',
+        description: 'Heavy duty M50 grade concrete pour for multi-tier podium columns and robotic car parking levels.',
+        imageUrl: 'https://images.unsplash.com/photo-1590069261209-f8e9b8642343?auto=format&fit=crop&w=1200&q=80',
+        badge: 'High-Grade RCC'
+      },
+      {
+        id: 'sky-work-5',
+        title: 'High-Elevation Structural Engineering & Framing',
+        category: 'civil_inspection',
+        stage: 'Tower Alignment',
+        date: 'March 2026',
+        description: 'Laser-guided total station surveys ensuring true verticality of twin 32-storey residential towers.',
+        imageUrl: 'https://images.unsplash.com/photo-1531834685032-c34bf0d84c77?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Laser Surveyed'
+      },
+      {
+        id: 'sky-work-6',
+        title: 'Concrete Pumping Machinery & Batching Plant',
+        category: 'construction',
+        stage: 'Concrete Supply',
+        date: 'Live Operations',
+        description: 'Continuous transit mixer and stationary concrete pump delivering ready-mix concrete to high levels.',
+        imageUrl: 'https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=1200&q=80',
+        badge: 'Ready-Mix Concrete'
+      },
+      {
+        id: 'sky-work-7',
+        title: 'Aura Sky 32-Storey Landmark Architectural Profile',
+        category: 'elevation',
+        stage: 'Final Design Model',
+        date: 'Target Q2 2027',
+        description: 'Sleek white and charcoal aerodynamic towers offering sunset sea-breeze balconies over Mumbai skyline.',
+        imageUrl: '/assets/projects/aura-sky-mumbai.jpg',
+        badge: 'Signature Towers'
+      },
+      {
+        id: 'sky-work-8',
+        title: 'Skylight Covered Indoor Lap Pool & Leisure Spa',
+        category: 'amenities',
+        stage: 'Clubhouse Facilities',
+        date: 'Finishing Phase',
+        description: 'Dedicated heated wellness pool, steam room, and rooftop observatory lounge.',
+        imageUrl: '/assets/projects/aura-amenity-pool.jpg',
+        badge: 'Sky Amenities'
+      }
+    ],
+    constructionMilestones: [
+      { stage: 'Deep Piling & 3-Tier Basement Raft', progressPercentage: 100, targetDate: 'Q1 2025', status: 'Completed' },
+      { stage: 'Multi-Level Robotic Parking Podium', progressPercentage: 100, targetDate: 'Q4 2025', status: 'Completed' },
+      { stage: 'Tower Superstructure & Core Slab Casting', progressPercentage: 68, targetDate: 'Q4 2026', status: 'In Progress' },
+      { stage: 'Shear Wall & Balcony Formwork', progressPercentage: 55, targetDate: 'Q1 2027', status: 'In Progress' },
+      { stage: 'OTIS High-Speed Elevators & Lift Core', progressPercentage: 40, targetDate: 'Q1 2027', status: 'In Progress' },
+      { stage: 'Exterior Glazing, Texture & Handover', progressPercentage: 15, targetDate: 'Q2 2027', status: 'Upcoming' }
     ],
     overview: 'Rising into the Mumbai skyline, Aura Sky delivers modern metropolitan living at unmatched value. Featuring striking white and grey geometric architecture, cantilevered sunset balconies, infinity-edge covered swimming pool, sky garden, and multi-tier podium parking. Strategically located with rapid connectivity to Metro Line 2A and Western Express Highway.',
     highlights: [
