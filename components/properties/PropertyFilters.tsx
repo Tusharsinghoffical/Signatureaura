@@ -46,9 +46,9 @@ export interface FilterState {
   city: string;
   propertyType: string;
   bedrooms: number | 'all';
-  minPriceCr: string; // in Crores or Lakhs
-  maxPriceCr: string; // in Crores or Lakhs
-  pricePreset: 'all' | 'under_5cr' | '5_15cr' | '15_30cr' | 'above_30cr';
+  minPriceCr: string; // in Lakhs (40 - 90)
+  maxPriceCr: string; // in Lakhs (40 - 90)
+  pricePreset: 'all' | '40_55l' | '55_75l' | '75_90l' | 'lease';
   selectedAmenities: string[];
   sortBy: 'featured' | 'price_asc' | 'price_desc' | 'area_desc' | 'newest';
 }
@@ -84,11 +84,11 @@ export default function PropertyFilters({
   ];
 
   const pricePresets: { label: string; value: FilterState['pricePreset'] }[] = [
-    { label: 'All Budgets', value: 'all' },
-    { label: '< ₹5 Cr', value: 'under_5cr' },
-    { label: '₹5 Cr - ₹15 Cr', value: '5_15cr' },
-    { label: '₹15 Cr - ₹30 Cr', value: '15_30cr' },
-    { label: '₹30 Cr+', value: 'above_30cr' },
+    { label: 'All Budgets (₹40L–₹90L)', value: 'all' },
+    { label: '₹40L – ₹55L', value: '40_55l' },
+    { label: '₹55L – ₹75L', value: '55_75l' },
+    { label: '₹75L – ₹90L', value: '75_90l' },
+    { label: 'Lease (< ₹1L/mo)', value: 'lease' },
   ];
 
   const toggleAmenity = (amenityId: string) => {
@@ -312,16 +312,18 @@ export default function PropertyFilters({
               </select>
             </div>
 
-            {/* Custom Price Range in Cr */}
+            {/* Custom Price Range in Lakhs */}
             <div>
               <label className="block text-[11px] font-semibold text-stone-600 uppercase tracking-wider mb-1">
-                Budget Range (in ₹ Crores)
+                Budget Range (in ₹ Lakhs: 40L – 90L)
               </label>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
-                  placeholder="Min (e.g. 5)"
-                  step="0.5"
+                  placeholder="Min (e.g. 40)"
+                  min="40"
+                  max="90"
+                  step="5"
                   value={filters.minPriceCr}
                   onChange={(e) => onChange({ minPriceCr: e.target.value, pricePreset: 'all' })}
                   suppressHydrationWarning
@@ -330,8 +332,10 @@ export default function PropertyFilters({
                 <span className="text-stone-400 text-xs">-</span>
                 <input
                   type="number"
-                  placeholder="Max (e.g. 30)"
-                  step="0.5"
+                  placeholder="Max (e.g. 90)"
+                  min="40"
+                  max="90"
+                  step="5"
                   value={filters.maxPriceCr}
                   onChange={(e) => onChange({ maxPriceCr: e.target.value, pricePreset: 'all' })}
                   suppressHydrationWarning
@@ -439,7 +443,7 @@ export default function PropertyFilters({
 
           {(filters.minPriceCr || filters.maxPriceCr) && (
             <span className="inline-flex items-center gap-1 bg-[#B99A63] text-white px-2.5 py-0.5 rounded-full text-[11px]">
-              ₹ {filters.minPriceCr || '0'} Cr - {filters.maxPriceCr || '∞'} Cr
+              ₹ {filters.minPriceCr || '40'} L - {filters.maxPriceCr || '90'} L
               <X className="w-3 h-3 cursor-pointer" onClick={() => onChange({ minPriceCr: '', maxPriceCr: '' })} />
             </span>
           )}

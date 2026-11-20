@@ -58,9 +58,9 @@ const INITIAL_LEADS: Lead[] = [
     leadSource: 'contact_form',
     propertyId: 'the-worli-horizon-penthouse',
     propertyTitle: 'The Worli Horizon Triplex Penthouse',
-    budget: '₹ 30 Cr - 40 Cr',
+    budget: '₹ 80 Lakh – ₹ 90 Lakh',
     preferredLocation: 'Worli Sea Face, Mumbai',
-    message: 'Seeking confidential viewing for private family office residence. Sunset slot preferred.',
+    message: 'Seeking confidential viewing for private residence. Sunset slot preferred.',
     leadStatus: 'Contacted',
     preferredVisitDate: '2026-11-18',
     internalNotes: ['High-conviction buyer. In touch with Senior Advisory desk.'],
@@ -74,9 +74,9 @@ const INITIAL_LEADS: Lead[] = [
     leadSource: 'whatsapp',
     propertyId: 'villa-sol-terra-assagao',
     propertyTitle: 'Villa Sol Terra - Heritage Portuguese Estate',
-    budget: '₹ 15 Cr - 20 Cr',
+    budget: '₹ 70 Lakh – ₹ 85 Lakh',
     preferredLocation: 'Assagao, North Goa',
-    message: 'Looking to acquire freehold Portuguese villa with 1-acre private estate. Require FEMA remittance guidance.',
+    message: 'Looking to acquire freehold Portuguese villa estate. Require FEMA remittance guidance.',
     leadStatus: 'New',
     createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
   },
@@ -88,7 +88,7 @@ const INITIAL_LEADS: Lead[] = [
     leadSource: 'property_enquiry',
     propertyId: 'the-bkc-fintech-corporate-floor',
     propertyTitle: 'Grade-A Fintech Tower Corporate Floor - BKC',
-    budget: '₹ 40 Cr+',
+    budget: '₹ 85 Lakh – ₹ 90 Lakh',
     preferredLocation: 'G-Block, BKC, Mumbai',
     message: 'Planning corporate headquarters relocation for 180 engineers. Need LEED certification and cafeteria floor plate.',
     leadStatus: 'Qualified',
@@ -342,7 +342,33 @@ export function getStoredProperties(): Property[] {
       return SAMPLE_PROPERTIES;
     }
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : SAMPLE_PROPERTIES;
+    if (!Array.isArray(parsed) || parsed.length === 0) return SAMPLE_PROPERTIES;
+    return parsed.map((p: Property) => {
+      const seedMatch = SAMPLE_PROPERTIES.find(sp => sp.id === p.id || sp.slug === p.slug);
+      const needsPriceSync =
+        seedMatch &&
+        ((p.listingType === 'buy' && (p.price > 9000000 || p.price < 4000000 || p.price !== seedMatch.price)) ||
+          (p.listingType === 'rent' && p.price > 100000));
+
+      return {
+        ...p,
+        ...(needsPriceSync && seedMatch
+          ? {
+              price: seedMatch.price,
+              priceDisplay: seedMatch.priceDisplay,
+              pricePerSqFt: seedMatch.pricePerSqFt,
+              tagline: seedMatch.tagline,
+              description: seedMatch.description,
+              highlightFeatures: seedMatch.highlightFeatures,
+            }
+          : {}),
+        images: seedMatch && seedMatch.images.length > (p.images?.length || 0) ? seedMatch.images : p.images,
+        agent:
+          p.agent && p.agent.email?.toLowerCase() === 'aura@gmail.com'
+            ? { ...p.agent, email: BUSINESS_CONFIG.email }
+            : p.agent,
+      };
+    });
   } catch {
     return SAMPLE_PROPERTIES;
   }
@@ -397,7 +423,12 @@ export function getStoredSettings(): BusinessConfig {
       localStorage.setItem(KEYS.SETTINGS, JSON.stringify(BUSINESS_CONFIG));
       return BUSINESS_CONFIG;
     }
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw) as BusinessConfig;
+    if (parsed.email?.toLowerCase() === 'aura@gmail.com') {
+      parsed.email = BUSINESS_CONFIG.email;
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(parsed));
+    }
+    return parsed;
   } catch {
     return BUSINESS_CONFIG;
   }

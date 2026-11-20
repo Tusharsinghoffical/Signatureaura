@@ -150,26 +150,26 @@ function PropertiesContent() {
       }
     }
 
-    // Price Presets
-    if (filters.pricePreset === 'under_5cr') {
-      result = result.filter(p => p.price < 50000000);
-    } else if (filters.pricePreset === '5_15cr') {
-      result = result.filter(p => p.price >= 50000000 && p.price <= 150000000);
-    } else if (filters.pricePreset === '15_30cr') {
-      result = result.filter(p => p.price >= 150000000 && p.price <= 300000000);
-    } else if (filters.pricePreset === 'above_30cr') {
-      result = result.filter(p => p.price > 300000000);
+    // Price Presets (₹ 40 Lakh – ₹ 90 Lakh)
+    if (filters.pricePreset === '40_55l') {
+      result = result.filter(p => p.listingType === 'buy' && p.price >= 4000000 && p.price <= 5500000);
+    } else if (filters.pricePreset === '55_75l') {
+      result = result.filter(p => p.listingType === 'buy' && p.price > 5500000 && p.price <= 7500000);
+    } else if (filters.pricePreset === '75_90l') {
+      result = result.filter(p => p.listingType === 'buy' && p.price > 7500000 && p.price <= 9000000);
+    } else if (filters.pricePreset === 'lease') {
+      result = result.filter(p => p.listingType === 'rent');
     }
 
-    // Custom Min / Max Price in Crores
+    // Custom Min / Max Price in Lakhs
     if (filters.minPriceCr !== '') {
-      const minVal = parseFloat(filters.minPriceCr) * 10000000;
+      const minVal = parseFloat(filters.minPriceCr) * 100000;
       if (!isNaN(minVal)) {
         result = result.filter(p => p.price >= minVal);
       }
     }
     if (filters.maxPriceCr !== '') {
-      const maxVal = parseFloat(filters.maxPriceCr) * 10000000;
+      const maxVal = parseFloat(filters.maxPriceCr) * 100000;
       if (!isNaN(maxVal)) {
         result = result.filter(p => p.price <= maxVal);
       }

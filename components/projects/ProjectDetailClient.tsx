@@ -1,21 +1,17 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { 
-  Building, 
-  MapPin, 
   ShieldCheck, 
-  Calendar, 
   Sparkles, 
   ArrowRight,
   Phone,
   MessageSquare,
   FileDown,
   CheckCircle2,
-  Send,
   HardHat,
   Maximize2,
   X,
@@ -24,9 +20,10 @@ import {
   Clock,
   Activity,
   Layers,
-  Eye,
   Camera,
-  Check
+  Check,
+  Film,
+  Play
 } from 'lucide-react';
 import AnnouncementBar from '@/components/layout/AnnouncementBar';
 import Navbar from '@/components/layout/Navbar';
@@ -36,7 +33,7 @@ import SharePageButton from '@/components/common/SharePageButton';
 import { SAMPLE_PROJECTS } from '@/lib/data/sample-data';
 import { createStoredLead } from '@/lib/client-storage';
 import { getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
-import { ProjectDevelopment, ConstructionWorkUpdate } from '@/types/real-estate';
+import { ProjectDevelopment, ConstructionWorkUpdate, ProjectWorkVideo } from '@/types/real-estate';
 
 export default function ProjectDetailClient({ 
   slug, 
@@ -59,6 +56,7 @@ export default function ProjectDetailClient({
   // Gallery filter & Lightbox state
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [activeVideo, setActiveVideo] = useState<ProjectWorkVideo | null>(null);
 
   // Fallback construction updates if not defined
   const updates: ConstructionWorkUpdate[] = project.constructionGallery || [
@@ -74,9 +72,17 @@ export default function ProjectDetailClient({
     }
   ];
 
-  const filteredUpdates = activeCategory === 'all'
-    ? updates
-    : updates.filter(u => u.category === activeCategory);
+  const videos: ProjectWorkVideo[] = project.constructionVideos || [];
+
+  const filteredUpdates =
+    activeCategory === 'all' || activeCategory === 'videos'
+      ? activeCategory === 'videos'
+        ? []
+        : updates
+      : updates.filter(u => u.category === activeCategory);
+
+  const showVideosSection =
+    videos.length > 0 && (activeCategory === 'all' || activeCategory === 'videos');
 
   const handleBrochureSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,15 +118,41 @@ export default function ProjectDetailClient({
     }
   };
 
-  const handlePrevImage = () => {
-    if (lightboxIndex === null) return;
+  const handlePrevImage = useCallback(() => {
+    if (lightboxIndex === null || filteredUpdates.length === 0) return;
     setLightboxIndex((lightboxIndex - 1 + filteredUpdates.length) % filteredUpdates.length);
-  };
+  }, [lightboxIndex, filteredUpdates.length]);
 
-  const handleNextImage = () => {
-    if (lightboxIndex === null) return;
+  const handleNextImage = useCallback(() => {
+    if (lightboxIndex === null || filteredUpdates.length === 0) return;
     setLightboxIndex((lightboxIndex + 1) % filteredUpdates.length);
-  };
+  }, [lightboxIndex, filteredUpdates.length]);
+
+  useEffect(() => {
+    if (lightboxIndex === null && activeVideo === null) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setLightboxIndex(null);
+        setActiveVideo(null);
+      } else if (lightboxIndex !== null) {
+        if (e.key === 'ArrowLeft') handlePrevImage();
+        if (e.key === 'ArrowRight') handleNextImage();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [lightboxIndex, activeVideo, handlePrevImage, handleNextImage]);
+
+  const filterTabs = [
+    { key: 'all', label: `All Works (${updates.length + videos.length})` },
+    ...(videos.length > 0 ? [{ key: 'videos', label: `Project Videos (${videos.length})` }] : []),
+    { key: 'interiors', label: 'Lobby, Lifts & Interiors' },
+    { key: 'construction', label: 'RCC & Superstructure' },
+    { key: 'elevation', label: 'Exterior & Facade' },
+    { key: 'amenities', label: 'Podium & Amenities' },
+    { key: 'masonry', label: 'Masonry & Plaster' },
+    { key: 'civil_inspection', label: 'Engineering QA' }
+  ];
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#171717] font-sans flex flex-col">
@@ -241,7 +273,7 @@ export default function ProjectDetailClient({
                         </span>
                         <div className="flex items-center gap-3">
                           <span className="text-stone-500 text-xs">{m.targetDate}</span>
-                          <span className={`font-semibold text-xs px-2 py-0.5 rounded ${
+                          <span className={`font-semibold text-xs px-2 py-0.5 rounded tabular-nums ${
                             m.status === 'Completed' ? 'bg-emerald-100 text-emerald-800' :
                             m.status === 'In Progress' ? 'bg-amber-100 text-amber-800' : 'bg-stone-100 text-stone-600'
                           }`}>
@@ -265,7 +297,7 @@ export default function ProjectDetailClient({
                 </div>
 
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs text-stone-500 border-t border-[#E8E5DF]">
-                  <span>Last engineering site audit completed: March 2026</span>
+                  <span>Last engineering site audit completed: November 2026</span>
                   <a
                     href={getWhatsAppLink(`Hello Signature Aura, please share the latest site progress report and construction video for ${project.title}.`)}
                     target="_blank"
@@ -279,44 +311,43 @@ export default function ProjectDetailClient({
               </section>
             )}
 
-            {/* Comprehensive Working Works & Construction Gallery */}
-            <section className="bg-white border border-[#E8E5DF] rounded-xl p-6 sm:p-8 shadow-xs space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* Comprehensive Working Works & Construction Gallery (Photos + Videos) */}
+            <section id="project-work" className="bg-white border border-[#E8E5DF] rounded-xl p-6 sm:p-8 shadow-xs space-y-6 scroll-mt-24">
+              <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <span className="text-xs font-semibold text-[#B99A63] tracking-widest uppercase block mb-1">
-                    On-Site Photographic Evidence
+                    On-Site Photographic & Video Evidence
                   </span>
                   <h3 className="font-serif text-2xl text-[#171717]">
                     Working Works & Site Gallery
                   </h3>
                   <p className="text-xs sm:text-sm text-stone-600 font-light mt-1">
-                    Real photographic records of civil structural works, scaffolding, rebar steel casting, and architectural elevation.
+                    Verified on-site photos and walkthrough videos covering active RCC towers, finished Italian marble lobbies, high-speed elevators, podium parking, and interior joinery.
                   </p>
                 </div>
                 
-                <span className="text-xs text-stone-500 font-medium">
-                  {filteredUpdates.length} Photos
-                </span>
+                <div className="flex items-center gap-2 text-xs text-stone-600 font-medium whitespace-nowrap">
+                  <span>{filteredUpdates.length} Photos</span>
+                  {videos.length > 0 && (
+                    <>
+                      <span aria-hidden="true">·</span>
+                      <span>{videos.length} Videos</span>
+                    </>
+                  )}
+                </div>
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex items-center gap-2 overflow-x-auto pb-2 border-b border-[#E8E5DF] scrollbar-none">
-                {[
-                  { key: 'all', label: 'All Works' },
-                  { key: 'construction', label: 'RCC & Superstructure' },
-                  { key: 'masonry', label: 'Masonry & Scaffolding' },
-                  { key: 'civil_inspection', label: 'Engineering QA' },
-                  { key: 'elevation', label: 'Elevation & Facade' },
-                  { key: 'amenities', label: 'Clubhouse & Pool' }
-                ].map(tab => (
+              <div className="flex items-center gap-2 overflow-x-auto pb-2.5 border-b border-[#E8E5DF] scrollbar-none">
+                {filterTabs.map(tab => (
                   <button
                     key={tab.key}
                     type="button"
                     onClick={() => setActiveCategory(tab.key)}
-                    className={`text-xs px-3.5 py-1.5 rounded-full whitespace-nowrap transition-all font-medium ${
+                    className={`text-xs px-3.5 py-2 rounded-lg whitespace-nowrap shrink-0 transition-colors font-medium cursor-pointer ${
                       activeCategory === tab.key
                         ? 'bg-[#171717] text-white shadow-xs'
-                        : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
+                        : 'bg-stone-100 text-stone-700 hover:bg-stone-200'
                     }`}
                   >
                     {tab.label}
@@ -324,67 +355,144 @@ export default function ProjectDetailClient({
                 ))}
               </div>
 
-              {/* Gallery Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {filteredUpdates.map((item, i) => (
-                  <div
-                    key={item.id}
-                    onClick={() => setLightboxIndex(i)}
-                    className="group relative bg-[#FAF9F5] border border-[#E8E5DF] hover:border-[#B99A63] rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col"
-                  >
-                    {/* Image Box */}
-                    <div className="relative aspect-[16/10] overflow-hidden bg-stone-900">
-                      <Image
-                        src={item.imageUrl}
-                        alt={item.title}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 40vw"
-                        className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                        referrerPolicy="no-referrer"
-                      />
-                      
-                      {/* Badge */}
-                      <div className="absolute top-3 left-3 bg-[#171717]/85 backdrop-blur-xs text-[#B99A63] text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded">
-                        {item.badge}
-                      </div>
-
-                      {/* Expand overlay button */}
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span className="inline-flex items-center gap-1.5 bg-white/95 text-[#171717] text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
-                          <Maximize2 className="w-3.5 h-3.5 text-[#B99A63]" />
-                          Expand Photo
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="p-4 flex-1 flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between text-[11px] text-stone-500 mb-1">
-                          <span className="font-medium text-[#B99A63]">{item.stage}</span>
-                          <span>{item.date}</span>
-                        </div>
-                        <h4 className="font-serif text-base text-[#171717] group-hover:text-[#B99A63] transition-colors leading-snug">
-                          {item.title}
-                        </h4>
-                        <p className="text-xs text-stone-600 mt-2 line-clamp-2 leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-
-                      <div className="mt-3 pt-3 border-t border-[#E8E5DF] flex items-center justify-between text-[11px] text-stone-500">
-                        <span className="flex items-center gap-1">
-                          <Camera className="w-3 h-3 text-stone-400" />
-                          Site Documentation
-                        </span>
-                        <span className="text-[#B99A63] font-semibold flex items-center gap-1">
-                          Inspect <ArrowRight className="w-3 h-3" />
-                        </span>
-                      </div>
-                    </div>
+              {/* Video Walkthroughs Section */}
+              {showVideosSection && (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <h4 className="font-serif text-lg text-[#171717] flex items-center gap-2">
+                      <Film className="w-4 h-4 text-[#B99A63]" />
+                      <span>Project Work Videos & Site Walkthroughs</span>
+                    </h4>
+                    <span className="text-xs text-stone-500">Tap play or open theater mode</span>
                   </div>
-                ))}
-              </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {videos.map((vid) => (
+                      <div
+                        key={vid.id}
+                        className="group bg-[#FAF9F5] border border-[#E8E5DF] hover:border-[#B99A63] rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col"
+                      >
+                        <div className="relative aspect-[16/10] bg-stone-950 overflow-hidden">
+                          <video
+                            src={vid.videoUrl}
+                            poster={vid.posterUrl}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            className="w-full h-full object-cover"
+                          />
+                          <div className="pointer-events-none absolute top-2.5 left-2.5 bg-[#171717]/85 text-[#B99A63] text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded">
+                            {vid.badge}
+                          </div>
+                        </div>
+
+                        <div className="p-4 flex-1 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center gap-2 text-[11px] text-stone-500 mb-1">
+                              <span className="font-medium text-[#B99A63]">{vid.stage}</span>
+                              <span aria-hidden="true">·</span>
+                              <span>{vid.duration}</span>
+                            </div>
+                            <h5 className="font-serif text-sm font-medium text-[#171717] leading-snug">
+                              {vid.title}
+                            </h5>
+                            <p className="text-xs text-stone-600 mt-1.5 line-clamp-2 leading-relaxed">
+                              {vid.description}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 pt-2.5 border-t border-[#E8E5DF] flex items-center justify-between text-[11px]">
+                            <span className="text-stone-500">{vid.date}</span>
+                            <button
+                              type="button"
+                              onClick={() => setActiveVideo(vid)}
+                              className="inline-flex items-center gap-1 text-[#171717] hover:text-[#B99A63] font-semibold cursor-pointer whitespace-nowrap"
+                            >
+                              <Play className="w-3 h-3 text-[#B99A63]" />
+                              <span>Theater View</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Photo Gallery Grid */}
+              {filteredUpdates.length > 0 && (
+                <div className="space-y-4">
+                  {showVideosSection && (
+                    <div className="flex items-center justify-between pt-2 border-t border-[#E8E5DF]">
+                      <h4 className="font-serif text-lg text-[#171717] flex items-center gap-2">
+                        <Camera className="w-4 h-4 text-[#B99A63]" />
+                        <span>Site Photography & Completed Spaces ({filteredUpdates.length})</span>
+                      </h4>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {filteredUpdates.map((item, i) => (
+                      <div
+                        key={item.id}
+                        onClick={() => setLightboxIndex(i)}
+                        className="group relative bg-[#FAF9F5] border border-[#E8E5DF] hover:border-[#B99A63] rounded-xl overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col"
+                      >
+                        {/* Image Box */}
+                        <div className="relative aspect-[16/10] overflow-hidden bg-stone-900">
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.title}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 40vw"
+                            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                            referrerPolicy="no-referrer"
+                          />
+                          
+                          {/* Badge */}
+                          <div className="absolute top-3 left-3 bg-[#171717]/85 backdrop-blur-xs text-[#B99A63] text-[10px] font-semibold tracking-wider uppercase px-2.5 py-1 rounded">
+                            {item.badge}
+                          </div>
+
+                          {/* Expand overlay button */}
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="inline-flex items-center gap-1.5 bg-white/95 text-[#171717] text-xs font-semibold px-3 py-1.5 rounded-full shadow-lg">
+                              <Maximize2 className="w-3.5 h-3.5 text-[#B99A63]" />
+                              Expand Photo
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Card Content */}
+                        <div className="p-4 flex-1 flex flex-col justify-between">
+                          <div>
+                            <div className="flex items-center justify-between text-[11px] text-stone-500 mb-1">
+                              <span className="font-medium text-[#B99A63]">{item.stage}</span>
+                              <span>{item.date}</span>
+                            </div>
+                            <h4 className="font-serif text-base text-[#171717] group-hover:text-[#B99A63] transition-colors leading-snug">
+                              {item.title}
+                            </h4>
+                            <p className="text-xs text-stone-600 mt-2 line-clamp-2 leading-relaxed">
+                              {item.description}
+                            </p>
+                          </div>
+
+                          <div className="mt-3 pt-3 border-t border-[#E8E5DF] flex items-center justify-between text-[11px] text-stone-500">
+                            <span className="flex items-center gap-1">
+                              <Camera className="w-3 h-3 text-stone-400" />
+                              Site Documentation
+                            </span>
+                            <span className="text-[#B99A63] font-semibold flex items-center gap-1">
+                              Inspect <ArrowRight className="w-3 h-3" />
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Site Visit Callout */}
               <div className="p-5 bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
@@ -420,27 +528,27 @@ export default function ProjectDetailClient({
               <h3 className="font-serif text-xl text-[#171717]">Project Dossier</h3>
               
               <div className="space-y-3 text-xs border-b border-[#E8E5DF] pb-4">
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-stone-500">Development</span>
-                  <span className="font-medium text-[#171717]">{project.title}</span>
+                  <span className="font-medium text-[#171717] text-right">{project.title}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-stone-500">Status</span>
                   <span className="font-medium text-[#B99A63]">{project.status}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-stone-500">Configurations</span>
-                  <span className="font-medium text-[#171717]">{project.configurations}</span>
+                  <span className="font-medium text-[#171717] text-right">{project.configurations}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-stone-500">Pricing</span>
                   <span className="font-medium text-[#B99A63]">{project.priceStartingFrom}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-stone-500">Scheduled Handover</span>
                   <span>{project.completionDate}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-stone-500">MahaRERA ID</span>
                   <span className="font-mono text-[11px] text-stone-700">{project.reraNumber}</span>
                 </div>
@@ -530,7 +638,7 @@ export default function ProjectDetailClient({
 
       </main>
 
-      {/* Lightbox Modal */}
+      {/* Photo Lightbox Modal */}
       {lightboxIndex !== null && filteredUpdates[lightboxIndex] && (
         <div 
           className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
@@ -552,13 +660,14 @@ export default function ProjectDetailClient({
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs text-stone-400 mr-2">
+                <span className="text-xs text-stone-400 mr-2 tabular-nums">
                   {lightboxIndex + 1} / {filteredUpdates.length}
                 </span>
                 <button
                   type="button"
                   onClick={() => setLightboxIndex(null)}
-                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                  className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                  aria-label="Close photo lightbox"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -579,7 +688,7 @@ export default function ProjectDetailClient({
               <button
                 type="button"
                 onClick={handlePrevImage}
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 transition-all"
+                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 transition-all cursor-pointer"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -589,7 +698,7 @@ export default function ProjectDetailClient({
               <button
                 type="button"
                 onClick={handleNextImage}
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 transition-all"
+                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/90 text-white border border-white/20 transition-all cursor-pointer"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -615,6 +724,69 @@ export default function ProjectDetailClient({
               >
                 <MessageSquare className="w-4 h-4" />
                 <span>Ask on WhatsApp</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Video Lightbox Modal */}
+      {activeVideo && (
+        <div
+          className="fixed inset-0 z-50 bg-black/92 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          onClick={() => setActiveVideo(null)}
+        >
+          <div
+            className="relative max-w-4xl w-full bg-[#171717] border border-white/10 rounded-2xl overflow-hidden shadow-2xl flex flex-col text-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-4 sm:p-5 flex items-center justify-between border-b border-white/10 bg-black/40">
+              <div className="flex items-center gap-3">
+                <span className="bg-[#B99A63] text-white text-[10px] font-semibold tracking-wider uppercase px-2.5 py-0.5 rounded">
+                  {activeVideo.badge}
+                </span>
+                <span className="text-xs text-stone-400">
+                  {activeVideo.stage} · {activeVideo.date} · {activeVideo.duration}
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setActiveVideo(null)}
+                className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                aria-label="Close video player"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="relative aspect-video w-full bg-black flex items-center justify-center">
+              <video
+                src={activeVideo.videoUrl}
+                poster={activeVideo.posterUrl}
+                controls
+                autoPlay
+                playsInline
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            <div className="p-5 sm:p-6 bg-[#1f1f1f] border-t border-white/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h4 className="font-serif text-lg text-white">{activeVideo.title}</h4>
+                <p className="text-xs sm:text-sm text-stone-400 mt-1 leading-relaxed max-w-2xl">
+                  {activeVideo.description}
+                </p>
+              </div>
+
+              <a
+                href={getWhatsAppLink(`Hello Signature Aura, I watched "${activeVideo.title}" for ${project.title} and would like to book a site inspection.`)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shrink-0 inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20ba5a] text-white text-xs font-semibold px-4 py-2.5 rounded-lg shadow-md transition-colors"
+              >
+                <MessageSquare className="w-4 h-4" />
+                <span>Book Inspection</span>
               </a>
             </div>
           </div>

@@ -16,22 +16,14 @@ import {
   Star, 
   Download, 
   Search, 
-  Lock, 
   LogOut, 
-  CheckCircle2, 
-  Clock, 
   TrendingUp, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  ShieldCheck,
-  Filter,
   Save,
   Key,
-  Sparkles,
   ExternalLink,
   RotateCcw,
-  Database
+  Database,
+  X
 } from 'lucide-react';
 import { Property, Lead, SiteVisit, BusinessConfig, LeadStatus } from '@/types/real-estate';
 import { BUSINESS_CONFIG, formatINR } from '@/lib/config';
@@ -41,16 +33,13 @@ import {
   deleteStoredProperty,
   getStoredLeads,
   updateStoredLeadStatus,
-  deleteStoredLead,
   getStoredSiteVisits,
   updateStoredSiteVisitStatus,
-  deleteStoredSiteVisit,
   getStoredSettings,
   updateStoredSettings,
   resetAllClientStorage,
   subscribeToClientStorage,
-  exportDataToCSV,
-  exportDataToJSON
+  exportDataToCSV
 } from '@/lib/client-storage';
 
 function subscribeAdminAuth(callback: () => void) {
@@ -97,9 +86,9 @@ export default function AdminPage() {
     title: '',
     tagline: '',
     slug: '',
-    price: 150000000,
-    priceDisplay: '₹ 15.00 Cr',
-    pricePerSqFt: 35000,
+    price: 6500000,
+    priceDisplay: '₹ 65 Lakh',
+    pricePerSqFt: 7500,
     listingType: 'buy',
     category: 'residential',
     propertyType: 'Apartment',
@@ -158,7 +147,7 @@ export default function AdminPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMsg, setPasswordMsg] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isChangingPassword] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -398,15 +387,15 @@ export default function AdminPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#F5F3EF] text-[#171717] font-sans flex flex-col">
+    <div className="min-h-screen bg-[#F5F3EF] text-[#171717] font-sans flex flex-col overflow-x-hidden">
       
       {/* Admin Top Navigation */}
       <header className="bg-[#171717] text-white border-b border-[#2D2D2D] sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 min-h-16 py-2.5 sm:py-0 sm:h-16 flex flex-wrap items-center justify-between gap-2 sm:gap-4">
           
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 shrink-0 drop-shadow-sm">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <Link href="/" className="flex items-center gap-2 sm:gap-2.5 group min-w-0">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 shrink-0 drop-shadow-sm">
                 <Image
                   src="/assets/branding/signature-aura-logo-official.png?v=20261105"
                   alt="Signature Aura Developers"
@@ -414,7 +403,7 @@ export default function AdminPage() {
                   className="object-contain"
                 />
               </div>
-              <div className="relative h-6 w-32 shrink-0">
+              <div className="relative h-5 w-24 sm:h-6 sm:w-32 shrink-0">
                 <Image
                   src="/assets/branding/logo-text.png"
                   alt="Signature Aura"
@@ -423,160 +412,174 @@ export default function AdminPage() {
                 />
               </div>
             </Link>
-            <span className="hidden sm:inline text-stone-600">|</span>
-            <span className="hidden sm:inline text-xs text-stone-400">
+            <span className="hidden lg:inline text-stone-600">|</span>
+            <span className="hidden lg:inline text-xs text-stone-400 whitespace-nowrap">
               Advisor & Management Console
             </span>
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-600/40 text-[11px] text-emerald-400">
+            <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-600/40 text-[11px] text-emerald-400 shrink-0">
               <span className={`w-1.5 h-1.5 rounded-full ${isRealtimeConnected ? 'bg-emerald-400 animate-pulse' : 'bg-stone-500'}`} />
-              <span className="font-mono text-[10px] tracking-wider uppercase font-semibold">
+              <span className="font-mono text-[10px] tracking-wider uppercase font-semibold sm:hidden">
+                Live
+              </span>
+              <span className="font-mono text-[10px] tracking-wider uppercase font-semibold hidden sm:inline">
                 {isRealtimeConnected ? 'Realtime Live' : 'Connecting...'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs">
+          <div className="flex items-center gap-2 sm:gap-4 text-xs shrink-0">
             <Link
               href="/"
               target="_blank"
-              className="text-stone-400 hover:text-white flex items-center gap-1 transition-colors"
+              className="text-stone-300 hover:text-white flex items-center gap-1.5 transition-colors px-2.5 py-1.5 sm:px-0 sm:py-0 rounded-lg bg-white/5 sm:bg-transparent border border-white/10 sm:border-0 whitespace-nowrap"
             >
-              <span>View Live Site</span>
+              <span className="hidden sm:inline">View Live Site</span>
+              <span className="sm:hidden">Live Site</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
             <button
               onClick={handleLogout}
-              className="flex items-center gap-1 text-stone-400 hover:text-red-400 transition-colors"
+              className="flex items-center gap-1.5 text-stone-300 hover:text-red-400 transition-colors px-2.5 py-1.5 sm:px-0 sm:py-0 rounded-lg bg-white/5 sm:bg-transparent border border-white/10 sm:border-0 whitespace-nowrap cursor-pointer"
             >
               <LogOut className="w-3.5 h-3.5" />
-              <span>Sign Out</span>
+              <span className="hidden xs:inline sm:inline">Sign Out</span>
             </button>
           </div>
 
         </div>
 
-        {/* Admin Tabs Bar (Touch swipeable on mobile) */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-3 sm:space-x-6 overflow-x-auto scrollbar-none flex-nowrap text-xs tracking-wider uppercase font-medium">
+        {/* Admin Tabs Bar (Touch swipeable on mobile & tablet, full row on laptop & desktop) */}
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 flex items-center gap-1.5 sm:gap-5 overflow-x-auto scrollbar-none flex-nowrap text-[11px] sm:text-xs tracking-wider uppercase font-medium border-t border-white/5">
           <button
             onClick={() => setActiveTab('overview')}
-            className={`py-3.5 px-2 border-b-2 whitespace-nowrap transition-colors touch-target ${
+            className={`py-3 px-2.5 sm:px-2 border-b-2 whitespace-nowrap shrink-0 transition-colors flex items-center gap-1.5 min-h-[44px] cursor-pointer ${
               activeTab === 'overview' ? 'border-[#B99A63] text-white' : 'border-transparent text-stone-400 hover:text-stone-200'
             }`}
           >
-            Overview
+            <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+            <span>Overview</span>
           </button>
           <button
             onClick={() => setActiveTab('properties')}
-            className={`py-3.5 px-2 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 touch-target ${
+            className={`py-3 px-2.5 sm:px-2 border-b-2 whitespace-nowrap shrink-0 transition-colors flex items-center gap-1.5 min-h-[44px] cursor-pointer ${
               activeTab === 'properties' ? 'border-[#B99A63] text-white' : 'border-transparent text-stone-400 hover:text-stone-200'
             }`}
           >
+            <Building className="w-3.5 h-3.5 shrink-0" />
             <span>Properties</span>
-            <span className="bg-[#2D2D2D] text-stone-300 text-[10px] px-1.5 py-0.2 rounded font-mono">
+            <span className="bg-[#2D2D2D] text-stone-300 text-[10px] px-1.5 py-0.5 rounded font-mono">
               {properties.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('leads')}
-            className={`py-3.5 px-2 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 touch-target ${
+            className={`py-3 px-2.5 sm:px-2 border-b-2 whitespace-nowrap shrink-0 transition-colors flex items-center gap-1.5 min-h-[44px] cursor-pointer ${
               activeTab === 'leads' ? 'border-[#B99A63] text-white' : 'border-transparent text-stone-400 hover:text-stone-200'
             }`}
           >
+            <Users className="w-3.5 h-3.5 shrink-0" />
             <span>Leads & Enquiries</span>
-            <span className="bg-[#B99A63] text-[#171717] font-semibold text-[10px] px-1.5 py-0.2 rounded font-mono">
+            <span className="bg-[#B99A63] text-[#171717] font-semibold text-[10px] px-1.5 py-0.5 rounded font-mono">
               {leads.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('visits')}
-            className={`py-3.5 px-2 border-b-2 whitespace-nowrap transition-colors flex items-center gap-1.5 touch-target ${
+            className={`py-3 px-2.5 sm:px-2 border-b-2 whitespace-nowrap shrink-0 transition-colors flex items-center gap-1.5 min-h-[44px] cursor-pointer ${
               activeTab === 'visits' ? 'border-[#B99A63] text-white' : 'border-transparent text-stone-400 hover:text-stone-200'
             }`}
           >
+            <Calendar className="w-3.5 h-3.5 shrink-0" />
             <span>Site Visits</span>
-            <span className="bg-[#2D2D2D] text-stone-300 text-[10px] px-1.5 py-0.2 rounded font-mono">
+            <span className="bg-[#2D2D2D] text-stone-300 text-[10px] px-1.5 py-0.5 rounded font-mono">
               {visits.length}
             </span>
           </button>
           <button
             onClick={() => setActiveTab('settings')}
-            className={`py-3.5 px-2 border-b-2 whitespace-nowrap transition-colors touch-target ${
+            className={`py-3 px-2.5 sm:px-2 border-b-2 whitespace-nowrap shrink-0 transition-colors flex items-center gap-1.5 min-h-[44px] cursor-pointer ${
               activeTab === 'settings' ? 'border-[#B99A63] text-white' : 'border-transparent text-stone-400 hover:text-stone-200'
             }`}
           >
-            Settings
+            <Settings className="w-3.5 h-3.5 shrink-0" />
+            <span>Settings</span>
           </button>
         </div>
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20 sm:py-8 w-full">
+      <main className="flex-1 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-5 pb-20 sm:py-8 w-full min-w-0">
 
         {/* =====================================================================
             TAB 1: OVERVIEW METRICS
            ===================================================================== */}
         {activeTab === 'overview' && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="font-serif text-3xl text-[#171717]">Executive Dashboard</h2>
-              <p className="text-xs text-stone-500 mt-1">Real-time inventory and client inquiry metrics.</p>
+          <div className="space-y-6 sm:space-y-8">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <div>
+                <h1 className="font-serif text-2xl sm:text-3xl text-[#171717]">Executive Dashboard</h1>
+                <p className="text-xs text-stone-500 mt-1">Real-time inventory and client inquiry metrics.</p>
+              </div>
+              <span className="text-[11px] font-medium text-stone-500 bg-white border border-[#E8E5DF] px-3 py-1.5 rounded-lg self-start sm:self-auto">
+                Catalog Price Range: ₹ 40 Lakh – ₹ 90 Lakh
+              </span>
             </div>
 
-            {/* Metric Cards Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-              <div className="bg-white p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
+            {/* Metric Cards Grid: 2 cols mobile -> 3 cols tablet/small laptop -> 6 cols desktop */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-4">
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
                 <span className="text-[10px] font-semibold tracking-wider text-stone-500 uppercase block">Total Portfolio</span>
-                <span className="font-serif text-3xl text-[#171717] mt-1 block font-normal">{properties.length}</span>
+                <span className="font-serif text-2xl sm:text-3xl text-[#171717] mt-1 block font-normal tabular-nums">{properties.length}</span>
                 <span className="text-[11px] text-stone-400 mt-1 block">Active Assets</span>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
                 <span className="text-[10px] font-semibold tracking-wider text-stone-500 uppercase block">Published</span>
-                <span className="font-serif text-3xl text-emerald-700 mt-1 block font-normal">
+                <span className="font-serif text-2xl sm:text-3xl text-emerald-700 mt-1 block font-normal tabular-nums">
                   {properties.filter(p => p.isPublished).length}
                 </span>
                 <span className="text-[11px] text-stone-400 mt-1 block">Public Catalog</span>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
                 <span className="text-[10px] font-semibold tracking-wider text-stone-500 uppercase block">Signature Listings</span>
-                <span className="font-serif text-3xl text-[#B99A63] mt-1 block font-normal">
+                <span className="font-serif text-2xl sm:text-3xl text-[#B99A63] mt-1 block font-normal tabular-nums">
                   {properties.filter(p => p.isFeatured).length}
                 </span>
                 <span className="text-[11px] text-stone-400 mt-1 block">Featured</span>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
                 <span className="text-[10px] font-semibold tracking-wider text-stone-500 uppercase block">Total Leads</span>
-                <span className="font-serif text-3xl text-[#171717] mt-1 block font-normal">{leads.length}</span>
+                <span className="font-serif text-2xl sm:text-3xl text-[#171717] mt-1 block font-normal tabular-nums">{leads.length}</span>
                 <span className="text-[11px] text-stone-400 mt-1 block">All Channels</span>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
                 <span className="text-[10px] font-semibold tracking-wider text-stone-500 uppercase block">New Enquiries</span>
-                <span className="font-serif text-3xl text-blue-700 mt-1 block font-normal">
+                <span className="font-serif text-2xl sm:text-3xl text-blue-700 mt-1 block font-normal tabular-nums">
                   {leads.filter(l => l.leadStatus === 'New').length}
                 </span>
                 <span className="text-[11px] text-stone-400 mt-1 block">Requires Contact</span>
               </div>
 
-              <div className="bg-white p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
+              <div className="bg-white p-4 sm:p-5 rounded-xl border border-[#E8E5DF] shadow-xs">
                 <span className="text-[10px] font-semibold tracking-wider text-stone-500 uppercase block">Site Visits</span>
-                <span className="font-serif text-3xl text-[#171717] mt-1 block font-normal">{visits.length}</span>
+                <span className="font-serif text-2xl sm:text-3xl text-[#171717] mt-1 block font-normal tabular-nums">{visits.length}</span>
                 <span className="text-[11px] text-stone-400 mt-1 block">Scheduled Viewings</span>
               </div>
             </div>
 
             {/* Quick Actions & Recent Activity */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8">
               
               {/* Recent Leads */}
-              <div className="lg:col-span-7 bg-white border border-[#E8E5DF] rounded-xl p-6 shadow-xs">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-serif text-lg text-[#171717]">Recent High-Intent Enquiries</h3>
+              <div className="lg:col-span-7 bg-white border border-[#E8E5DF] rounded-xl p-4 sm:p-6 shadow-xs min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <h3 className="font-serif text-base sm:text-lg text-[#171717]">Recent High-Intent Enquiries</h3>
                   <button
                     onClick={() => setActiveTab('leads')}
-                    className="text-xs text-[#B99A63] hover:text-[#171717] font-medium"
+                    className="text-xs text-[#B99A63] hover:text-[#171717] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     View All Leads →
                   </button>
@@ -584,29 +587,31 @@ export default function AdminPage() {
 
                 <div className="divide-y divide-[#E8E5DF]">
                   {leads.slice(0, 4).map((lead) => (
-                    <div key={lead.id} className="py-3 flex items-start justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-medium text-xs text-[#171717]">{lead.fullName}</span>
-                          <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.2 rounded capitalize">
-                            {lead.leadSource.replace('_', ' ')}
+                    <div key={lead.id} className="py-3.5 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-medium text-xs sm:text-sm text-[#171717]">{lead.fullName}</span>
+                          <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded capitalize whitespace-nowrap">
+                            {lead.leadSource.replace(/_/g, ' ')}
                           </span>
                         </div>
-                        <p className="text-xs text-stone-500 mt-0.5">
+                        <p className="text-xs text-stone-600 mt-0.5 break-words">
                           {lead.propertyTitle || 'General Advisory Request'}
                         </p>
-                        <p className="text-[11px] text-stone-400 mt-1">{lead.phone} · {lead.email}</p>
+                        <p className="text-[11px] text-stone-400 mt-1 break-all sm:break-normal">
+                          {lead.phone} · {lead.email}
+                        </p>
                       </div>
 
-                      <div className="text-right flex-shrink-0">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0 pt-1 sm:pt-0">
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap ${
                           lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-700' :
                           lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-700' :
                           'bg-stone-100 text-stone-700'
                         }`}>
                           {lead.leadStatus}
                         </span>
-                        <span className="text-[10px] text-stone-400 block mt-1">
+                        <span className="text-[10px] text-stone-400 tabular-nums">
                           {new Date(lead.createdAt).toLocaleDateString('en-IN')}
                         </span>
                       </div>
@@ -616,12 +621,12 @@ export default function AdminPage() {
               </div>
 
               {/* Upcoming Site Visits */}
-              <div className="lg:col-span-5 bg-white border border-[#E8E5DF] rounded-xl p-6 shadow-xs">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-serif text-lg text-[#171717]">Upcoming Site Visits</h3>
+              <div className="lg:col-span-5 bg-white border border-[#E8E5DF] rounded-xl p-4 sm:p-6 shadow-xs min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-4">
+                  <h3 className="font-serif text-base sm:text-lg text-[#171717]">Upcoming Site Visits</h3>
                   <button
                     onClick={() => setActiveTab('visits')}
-                    className="text-xs text-[#B99A63] hover:text-[#171717] font-medium"
+                    className="text-xs text-[#B99A63] hover:text-[#171717] font-medium whitespace-nowrap shrink-0 cursor-pointer"
                   >
                     Manage Visits →
                   </button>
@@ -629,19 +634,19 @@ export default function AdminPage() {
 
                 <div className="space-y-3">
                   {visits.slice(0, 3).map((v) => (
-                    <div key={v.id} className="p-3 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg">
-                      <div className="flex justify-between items-start">
-                        <span className="font-medium text-xs text-[#171717]">{v.fullName}</span>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                    <div key={v.id} className="p-3.5 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg">
+                      <div className="flex justify-between items-start gap-2">
+                        <span className="font-medium text-xs sm:text-sm text-[#171717] min-w-0 break-words">{v.fullName}</span>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${
                           v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                         }`}>
                           {v.status}
                         </span>
                       </div>
-                      <p className="text-xs text-stone-600 truncate mt-1">{v.propertyTitle}</p>
-                      <div className="mt-2 flex items-center justify-between text-[11px] text-stone-500">
-                        <span>{v.visitDate} ({v.timeSlot})</span>
-                        {v.pickupRequired && <span className="text-[#B99A63] font-medium">VIP Chauffeur</span>}
+                      <p className="text-xs text-stone-600 line-clamp-2 sm:truncate mt-1">{v.propertyTitle}</p>
+                      <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-stone-500">
+                        <span className="break-words">{v.visitDate} ({v.timeSlot})</span>
+                        {v.pickupRequired && <span className="text-[#B99A63] font-medium whitespace-nowrap">VIP Chauffeur</span>}
                       </div>
                     </div>
                   ))}
@@ -659,9 +664,9 @@ export default function AdminPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="font-serif text-3xl text-[#171717]">Property Portfolio Management</h2>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Property Portfolio Management</h2>
                 <p className="text-xs text-stone-500 mt-1">
-                  Manage inventory, pricing, publication status, and signature badges.
+                  Manage inventory, pricing (₹ 40 Lakh – ₹ 90 Lakh), publication status, and signature badges.
                 </p>
               </div>
 
@@ -672,9 +677,9 @@ export default function AdminPage() {
                     title: '',
                     tagline: '',
                     slug: '',
-                    price: 150000000,
-                    priceDisplay: '₹ 15.00 Cr',
-                    pricePerSqFt: 35000,
+                    price: 6500000,
+                    priceDisplay: '₹ 65 Lakh',
+                    pricePerSqFt: 7500,
                     listingType: 'buy',
                     category: 'residential',
                     propertyType: 'Apartment',
@@ -707,19 +712,19 @@ export default function AdminPage() {
                   });
                   setIsPropertyModalOpen(true);
                 }}
-                className="bg-[#171717] hover:bg-[#B99A63] text-white text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded transition-all flex items-center gap-1.5 self-start sm:self-auto shadow"
+                className="bg-[#171717] hover:bg-[#B99A63] text-white text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto shadow cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 <span>Create New Listing</span>
               </button>
             </div>
 
-            {/* Properties Table & Mobile Cards */}
+            {/* Properties Table & Mobile/Tablet Cards */}
             <div className="bg-white border border-[#E8E5DF] rounded-xl overflow-hidden shadow-xs">
-              {/* Mobile Card List (< md) */}
-              <div className="block md:hidden divide-y divide-[#E8E5DF]">
+              {/* Mobile & Tablet Card Grid (< lg) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
                 {properties.map((prop) => (
-                  <div key={prop.id} className="p-4 space-y-3">
+                  <div key={prop.id} className="p-4 space-y-3 bg-white md:border md:border-[#E8E5DF] md:rounded-xl">
                     <div className="flex items-start gap-3">
                       <div className="relative w-16 h-16 rounded overflow-hidden bg-stone-200 flex-shrink-0">
                         <Image
@@ -741,21 +746,21 @@ export default function AdminPage() {
                         <span className="text-[11px] text-stone-500 block">
                           {prop.bedrooms > 0 ? `${prop.bedrooms} BHK · ` : ''}{prop.carpetAreaSqFt} sq.ft.
                         </span>
-                        <div className="text-[11px] text-stone-600 mt-0.5">
+                        <div className="text-[11px] text-stone-600 mt-0.5 truncate">
                           {prop.location.locality}, {prop.location.city}
                         </div>
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between text-xs pt-1 border-t border-stone-100">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-xs pt-2 border-t border-stone-100">
                       <div>
                         <span className="text-[10px] text-stone-400 uppercase tracking-wider block">Price</span>
                         <span className="font-semibold text-stone-900 text-sm">{prop.priceDisplay}</span>
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => togglePublish(prop)}
-                          className={`flex items-center gap-1 px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                          className={`flex items-center gap-1 px-2.5 py-1.5 rounded text-[11px] font-medium transition-colors cursor-pointer ${
                             prop.isPublished ? 'bg-emerald-50 text-emerald-800' : 'bg-stone-100 text-stone-500'
                           }`}
                         >
@@ -764,7 +769,7 @@ export default function AdminPage() {
                         </button>
                         <button
                           onClick={() => toggleFeatured(prop)}
-                          className={`p-1.5 rounded transition-colors ${
+                          className={`p-1.5 rounded transition-colors cursor-pointer ${
                             prop.isFeatured ? 'text-[#B99A63]' : 'text-stone-300 hover:text-stone-500'
                           }`}
                           title="Toggle featured"
@@ -807,14 +812,14 @@ export default function AdminPage() {
                             });
                             setIsPropertyModalOpen(true);
                           }}
-                          className="p-1.5 text-stone-600 hover:text-stone-900 bg-stone-100 rounded"
+                          className="p-2 text-stone-600 hover:text-stone-900 bg-stone-100 rounded cursor-pointer"
                           title="Edit listing"
                         >
                           <Edit className="w-3.5 h-3.5" />
                         </button>
                         <button
                           onClick={() => handleDeleteProperty(prop.id)}
-                          className="p-1.5 text-red-500 hover:text-red-700 bg-red-50 rounded"
+                          className="p-2 text-red-500 hover:text-red-700 bg-red-50 rounded cursor-pointer"
                           title="Delete listing"
                         >
                           <Trash2 className="w-3.5 h-3.5" />
@@ -825,8 +830,8 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              {/* Desktop Table (md+) */}
-              <div className="hidden md:block overflow-x-auto">
+              {/* Laptop & Desktop Table (lg+) */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
                     <tr>
@@ -969,7 +974,7 @@ export default function AdminPage() {
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <h2 className="font-serif text-3xl text-[#171717]">Leads & Client Inquiries</h2>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Leads & Client Inquiries</h2>
                 <p className="text-xs text-stone-500 mt-1">
                   Manage prospective buyers, tenant leads, and AI assistant conversions.
                 </p>
@@ -977,7 +982,7 @@ export default function AdminPage() {
 
               <button
                 onClick={handleExportLeadsCSV}
-                className="bg-white border border-[#E8E5DF] hover:border-stone-400 text-stone-800 text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded transition-all flex items-center gap-1.5 shadow-xs"
+                className="bg-white border border-[#E8E5DF] hover:border-stone-400 text-stone-800 text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto shadow-xs cursor-pointer"
               >
                 <Download className="w-4 h-4 text-[#B99A63]" />
                 <span>Export Leads (CSV)</span>
@@ -985,7 +990,7 @@ export default function AdminPage() {
             </div>
 
             {/* Filter and Search Bar */}
-            <div className="bg-white border border-[#E8E5DF] rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="bg-white border border-[#E8E5DF] rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
               <div className="relative w-full sm:w-72">
                 <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                 <input
@@ -993,16 +998,16 @@ export default function AdminPage() {
                   placeholder="Search lead by name, phone, email..."
                   value={leadSearch}
                   onChange={(e) => setLeadSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-[#FAF9F5] border border-[#E8E5DF] rounded text-xs focus:outline-none"
+                  className="w-full pl-9 pr-3 py-2 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg text-base sm:text-xs focus:outline-none"
                 />
               </div>
 
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-xs text-stone-500">Status:</span>
+                <span className="text-xs text-stone-500 shrink-0">Status:</span>
                 <select
                   value={leadStatusFilter}
                   onChange={(e) => setLeadStatusFilter(e.target.value)}
-                  className="bg-[#FAF9F5] border border-[#E8E5DF] px-3 py-2 rounded text-xs text-[#171717] focus:outline-none"
+                  className="w-full sm:w-auto bg-[#FAF9F5] border border-[#E8E5DF] px-3 py-2 rounded-lg text-base sm:text-xs text-[#171717] focus:outline-none"
                 >
                   <option value="all">All Statuses ({leads.length})</option>
                   <option value="New">New</option>
@@ -1015,22 +1020,22 @@ export default function AdminPage() {
               </div>
             </div>
 
-            {/* Leads Table & Mobile Cards */}
+            {/* Leads Table & Mobile/Tablet Cards */}
             <div className="bg-white border border-[#E8E5DF] rounded-xl overflow-hidden shadow-xs">
-              {/* Mobile Card List (< md) */}
-              <div className="block md:hidden divide-y divide-[#E8E5DF]">
+              {/* Mobile & Tablet Card Grid (< lg) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
                 {filteredLeads.map((lead) => (
-                  <div key={lead.id} className="p-4 space-y-2.5">
+                  <div key={lead.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="font-semibold text-stone-900 text-sm">{lead.fullName}</div>
-                        <div className="text-[11px] text-stone-500 mt-0.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold text-stone-900 text-sm break-words">{lead.fullName}</div>
+                        <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
                           <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{lead.phone}</a>
                           <span className="mx-1">·</span>
                           <span>{lead.email}</span>
                         </div>
                       </div>
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap ${
+                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap shrink-0 ${
                         lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-800' :
                         lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-800' :
                         lead.leadStatus === 'Site Visit Scheduled' ? 'bg-purple-50 text-purple-800' :
@@ -1042,26 +1047,26 @@ export default function AdminPage() {
                     </div>
 
                     <div className="bg-stone-50 p-2.5 rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-stone-500 text-[11px]">Property:</span>
-                        <span className="font-medium text-stone-800 text-right">{lead.propertyTitle || 'General Advisory'}</span>
+                      <div className="flex justify-between items-baseline gap-2">
+                        <span className="text-stone-500 text-[11px] shrink-0">Property:</span>
+                        <span className="font-medium text-stone-800 text-right break-words">{lead.propertyTitle || 'General Advisory'}</span>
                       </div>
                       {lead.budget && (
-                        <div className="flex justify-between items-baseline">
-                          <span className="text-stone-500 text-[11px]">Budget:</span>
-                          <span className="text-stone-700">{lead.budget}</span>
+                        <div className="flex justify-between items-baseline gap-2">
+                          <span className="text-stone-500 text-[11px] shrink-0">Budget:</span>
+                          <span className="text-stone-700 text-right">{lead.budget}</span>
                         </div>
                       )}
                       {lead.preferredVisitDate && (
-                        <div className="flex justify-between items-baseline">
-                          <span className="text-[#B99A63] text-[11px]">Visit Date:</span>
+                        <div className="flex justify-between items-baseline gap-2">
+                          <span className="text-[#B99A63] text-[11px] shrink-0">Visit Date:</span>
                           <span className="text-[#B99A63] font-mono">{lead.preferredVisitDate}</span>
                         </div>
                       )}
                     </div>
 
                     {lead.message && (
-                      <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF]">
+                      <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF] break-words">
                         &ldquo;{lead.message}&rdquo;
                       </p>
                     )}
@@ -1075,7 +1080,7 @@ export default function AdminPage() {
                         <select
                           value={lead.leadStatus}
                           onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as LeadStatus)}
-                          className="bg-[#FAF9F5] border border-[#E8E5DF] text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
+                          className="bg-[#FAF9F5] border border-[#E8E5DF] text-base sm:text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
                         >
                           <option value="New">New</option>
                           <option value="Contacted">Contacted</option>
@@ -1090,8 +1095,8 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              {/* Desktop Table (md+) */}
-              <div className="hidden md:block overflow-x-auto">
+              {/* Laptop & Desktop Table (lg+) */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
                     <tr>
@@ -1179,28 +1184,28 @@ export default function AdminPage() {
         {activeTab === 'visits' && (
           <div className="space-y-6">
             <div>
-              <h2 className="font-serif text-3xl text-[#171717]">Private Site Visit Requests</h2>
+              <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Private Site Visit Requests</h2>
               <p className="text-xs text-stone-500 mt-1">
                 Coordinate security pre-clearance, chauffeur pick-up, and advisor attendance.
               </p>
             </div>
 
-            {/* Site Visits Table & Mobile Cards */}
+            {/* Site Visits Table & Mobile/Tablet Cards */}
             <div className="bg-white border border-[#E8E5DF] rounded-xl overflow-hidden shadow-xs">
-              {/* Mobile Card List (< md) */}
-              <div className="block md:hidden divide-y divide-[#E8E5DF]">
+              {/* Mobile & Tablet Card Grid (< lg) */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
                 {visits.map((v) => (
-                  <div key={v.id} className="p-4 space-y-2.5">
+                  <div key={v.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="font-semibold text-stone-900 text-sm">{v.fullName}</div>
-                        <div className="text-[11px] text-stone-500 mt-0.5">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-semibold text-stone-900 text-sm break-words">{v.fullName}</div>
+                        <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
                           <a href={`tel:${v.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{v.phone}</a>
                           <span className="mx-1">·</span>
                           <span>{v.email}</span>
                         </div>
                       </div>
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap ${
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap shrink-0 ${
                         v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' :
                         v.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
                         'bg-stone-100 text-stone-600'
@@ -1210,13 +1215,13 @@ export default function AdminPage() {
                     </div>
 
                     <div className="bg-stone-50 p-2.5 rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-stone-500 text-[11px]">Property:</span>
-                        <span className="font-medium text-stone-800 text-right">{v.propertyTitle}</span>
+                      <div className="flex justify-between items-baseline gap-2">
+                        <span className="text-stone-500 text-[11px] shrink-0">Property:</span>
+                        <span className="font-medium text-stone-800 text-right break-words">{v.propertyTitle}</span>
                       </div>
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-stone-500 text-[11px]">Slot:</span>
-                        <span className="font-mono text-stone-800">{v.visitDate} ({v.timeSlot})</span>
+                      <div className="flex justify-between items-baseline gap-2">
+                        <span className="text-stone-500 text-[11px] shrink-0">Slot:</span>
+                        <span className="font-mono text-stone-800 text-right">{v.visitDate} ({v.timeSlot})</span>
                       </div>
                       <div className="flex justify-between items-center pt-1">
                         <span className="text-stone-500 text-[11px]">Transport:</span>
@@ -1231,7 +1236,7 @@ export default function AdminPage() {
                     </div>
 
                     {v.notes && (
-                      <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF]">
+                      <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF] break-words">
                         &ldquo;{v.notes}&rdquo;
                       </p>
                     )}
@@ -1241,7 +1246,7 @@ export default function AdminPage() {
                       <select
                         value={v.status}
                         onChange={(e) => handleUpdateVisitStatus(v.id, e.target.value as any)}
-                        className="bg-[#FAF9F5] border border-[#E8E5DF] text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
+                        className="bg-[#FAF9F5] border border-[#E8E5DF] text-base sm:text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
                       >
                         <option value="Pending">Pending</option>
                         <option value="Confirmed">Confirmed</option>
@@ -1253,8 +1258,8 @@ export default function AdminPage() {
                 ))}
               </div>
 
-              {/* Desktop Table (md+) */}
-              <div className="hidden md:block overflow-x-auto">
+              {/* Laptop & Desktop Table (lg+) */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
                     <tr>
@@ -1329,10 +1334,10 @@ export default function AdminPage() {
             TAB 5: BUSINESS SETTINGS
            ===================================================================== */}
         {activeTab === 'settings' && (
-          <div className="space-y-8">
-            <div className="max-w-3xl bg-white border border-[#E8E5DF] rounded-2xl p-8 shadow-xs space-y-6">
+          <div className="space-y-6 sm:space-y-8">
+            <div className="max-w-3xl bg-white border border-[#E8E5DF] rounded-2xl p-5 sm:p-8 shadow-xs space-y-6">
             <div>
-              <h2 className="font-serif text-3xl text-[#171717]">Business & Contact Settings</h2>
+              <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Business & Contact Settings</h2>
               <p className="text-xs text-stone-500 mt-1">
                 Centralized brand parameters automatically reflected across headers, WhatsApp links, and footers.
               </p>
@@ -1346,7 +1351,7 @@ export default function AdminPage() {
                     type="text"
                     value={settings.companyName}
                     onChange={(e) => setSettings({ ...settings, companyName: e.target.value })}
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
 
@@ -1356,7 +1361,7 @@ export default function AdminPage() {
                     type="text"
                     value={settings.tagline}
                     onChange={(e) => setSettings({ ...settings, tagline: e.target.value })}
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
               </div>
@@ -1368,7 +1373,7 @@ export default function AdminPage() {
                     type="text"
                     value={settings.phoneNumber}
                     onChange={(e) => setSettings({ ...settings, phoneNumber: e.target.value })}
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
 
@@ -1378,7 +1383,7 @@ export default function AdminPage() {
                     type="text"
                     value={settings.whatsappNumber}
                     onChange={(e) => setSettings({ ...settings, whatsappNumber: e.target.value })}
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
               </div>
@@ -1390,7 +1395,7 @@ export default function AdminPage() {
                     type="email"
                     value={settings.email}
                     onChange={(e) => setSettings({ ...settings, email: e.target.value })}
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
 
@@ -1400,7 +1405,7 @@ export default function AdminPage() {
                     type="text"
                     value={settings.reraRegistration}
                     onChange={(e) => setSettings({ ...settings, reraRegistration: e.target.value })}
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
               </div>
@@ -1411,7 +1416,7 @@ export default function AdminPage() {
                   type="text"
                   value={settings.officeAddress}
                   onChange={(e) => setSettings({ ...settings, officeAddress: e.target.value })}
-                  className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                  className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                 />
               </div>
 
@@ -1421,14 +1426,14 @@ export default function AdminPage() {
                   type="text"
                   value={settings.announcementBarText}
                   onChange={(e) => setSettings({ ...settings, announcementBarText: e.target.value })}
-                  className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                  className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                 />
               </div>
 
               <div className="pt-4 flex justify-end">
                 <button
                   type="submit"
-                  className="bg-[#171717] hover:bg-[#B99A63] text-white text-xs font-semibold tracking-wider uppercase px-6 py-2.5 rounded transition-all flex items-center gap-1.5 shadow"
+                  className="w-full sm:w-auto justify-center bg-[#171717] hover:bg-[#B99A63] text-white text-xs font-semibold tracking-wider uppercase px-6 py-2.5 rounded-lg transition-all flex items-center gap-1.5 shadow cursor-pointer"
                 >
                   <Save className="w-4 h-4" />
                   <span>Save Configuration</span>
@@ -1438,11 +1443,11 @@ export default function AdminPage() {
           </div>
 
           {/* Security & Password Management Card */}
-          <div className="max-w-3xl bg-white border border-[#E8E5DF] rounded-2xl p-8 shadow-xs space-y-6">
+          <div className="max-w-3xl bg-white border border-[#E8E5DF] rounded-2xl p-5 sm:p-8 shadow-xs space-y-6">
             <div>
-              <h2 className="font-serif text-3xl text-[#171717]">Portal Security & Encryption</h2>
+              <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Portal Security & Access PIN</h2>
               <p className="text-xs text-stone-500 mt-1">
-                Your portal access is secured with salted cryptographic <strong className="text-stone-700">scrypt</strong> encryption in the local SQLite database.
+                Manage your browser-local advisor access PIN for this management console.
               </p>
             </div>
 
@@ -1467,19 +1472,19 @@ export default function AdminPage() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     placeholder="Enter current password"
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-stone-700 mb-1">New Password (min 6 chars) *</label>
+                  <label className="block text-xs font-medium text-stone-700 mb-1">New Password (min 4 chars) *</label>
                   <input
                     type="password"
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="Enter new password"
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
 
@@ -1491,7 +1496,7 @@ export default function AdminPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="Repeat new password"
-                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2 rounded text-xs text-[#171717]"
+                    className="w-full bg-[#FAF9F5] border border-[#E8E5DF] px-3.5 py-2.5 rounded-lg text-base sm:text-xs text-[#171717]"
                   />
                 </div>
               </div>
@@ -1500,64 +1505,64 @@ export default function AdminPage() {
                 <button
                   type="submit"
                   disabled={isChangingPassword}
-                  className="bg-[#B99A63] hover:bg-[#a68853] text-[#171717] text-xs font-semibold tracking-wider uppercase px-6 py-2.5 rounded transition-all flex items-center gap-1.5 shadow disabled:opacity-50"
+                  className="w-full sm:w-auto justify-center bg-[#B99A63] hover:bg-[#a68853] text-[#171717] text-xs font-semibold tracking-wider uppercase px-6 py-2.5 rounded-lg transition-all flex items-center gap-1.5 shadow disabled:opacity-50 cursor-pointer"
                 >
                   <Key className="w-4 h-4" />
-                  <span>{isChangingPassword ? 'Encrypting & Saving...' : 'Update & Encrypt Password'}</span>
+                  <span>{isChangingPassword ? 'Saving...' : 'Update Access Password'}</span>
                 </button>
               </div>
             </form>
           </div>
 
-          {/* SQLite Database & Realtime Sync Card */}
-          <div className="max-w-3xl bg-white border border-[#E8E5DF] rounded-2xl p-8 shadow-xs space-y-6">
-            <div className="flex items-start justify-between">
+          {/* Client-Side Storage & Realtime Sync Card */}
+          <div className="max-w-3xl bg-white border border-[#E8E5DF] rounded-2xl p-5 sm:p-8 shadow-xs space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
               <div>
-                <h2 className="font-serif text-3xl text-[#171717] flex items-center gap-2">
-                  <Database className="w-6 h-6 text-[#B99A63]" />
-                  <span>Local SQLite & Realtime Engine</span>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#171717] flex items-center gap-2">
+                  <Database className="w-5 h-5 sm:w-6 sm:h-6 text-[#B99A63] shrink-0" />
+                  <span>Client Storage & Realtime Sync</span>
                 </h2>
                 <p className="text-xs text-stone-500 mt-1">
-                  High-performance local database <code className="bg-[#FAF9F5] px-1.5 py-0.5 rounded border border-[#E8E5DF] text-stone-700">data/signature_aura.db</code> with WAL mode and Server-Sent Events (SSE) live broadcast.
+                  Instant client-side persistence via browser <code className="bg-[#FAF9F5] px-1.5 py-0.5 rounded border border-[#E8E5DF] text-stone-700">localStorage</code> with cross-tab live updates.
                 </p>
               </div>
-              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs text-emerald-800 font-medium">
+              <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs text-emerald-800 font-medium self-start shrink-0">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>Realtime Active</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-2">
               <div className="bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl p-4">
-                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Database Engine</div>
-                <div className="text-sm font-semibold text-[#171717]">SQLite 3 (WAL Mode)</div>
+                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Storage Engine</div>
+                <div className="text-sm font-semibold text-[#171717]">Browser LocalStorage</div>
                 <div className="text-[11px] text-stone-500 mt-0.5">Zero external latency</div>
               </div>
               <div className="bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl p-4">
                 <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Live Sync Protocol</div>
-                <div className="text-sm font-semibold text-[#171717]">Server-Sent Events</div>
+                <div className="text-sm font-semibold text-[#171717]">Storage Event Bus</div>
                 <div className="text-[11px] text-stone-500 mt-0.5">Instant multi-tab push</div>
               </div>
               <div className="bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl p-4">
-                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Storage Location</div>
-                <div className="text-sm font-semibold text-[#171717]">Local Persistent</div>
-                <div className="text-[11px] text-stone-500 mt-0.5">Isolated from Git tracking</div>
+                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Catalog Range</div>
+                <div className="text-sm font-semibold text-[#171717]">₹ 40L – ₹ 90L</div>
+                <div className="text-[11px] text-stone-500 mt-0.5">Auto-synced from seed</div>
               </div>
             </div>
 
             <div className="pt-4 border-t border-[#E8E5DF] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <div className="text-xs font-semibold text-stone-800">Reset Database to Default Seeds</div>
-                <div className="text-xs text-stone-500">Restores clean property listings, initial leads, and site visit logs.</div>
+                <div className="text-xs font-semibold text-stone-800">Reset Client Storage to Default Seeds</div>
+                <div className="text-xs text-stone-500">Restores clean property listings (₹ 40L – ₹ 90L), initial leads, and site visit logs.</div>
               </div>
               <button
                 type="button"
                 onClick={handleResetDatabase}
                 disabled={isResettingDb}
-                className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold tracking-wider uppercase px-5 py-2.5 rounded transition-all flex items-center gap-2 disabled:opacity-50"
+                className="w-full sm:w-auto justify-center bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 text-xs font-semibold tracking-wider uppercase px-5 py-2.5 rounded-lg transition-all flex items-center gap-2 disabled:opacity-50 cursor-pointer shrink-0"
               >
                 <RotateCcw className={`w-3.5 h-3.5 ${isResettingDb ? 'animate-spin' : ''}`} />
-                <span>{isResettingDb ? 'Resetting Database...' : 'Reset Database'}</span>
+                <span>{isResettingDb ? 'Resetting Storage...' : 'Reset Default Data'}</span>
               </button>
             </div>
           </div>
@@ -1571,10 +1576,20 @@ export default function AdminPage() {
          ===================================================================== */}
       {isPropertyModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-xs overflow-y-auto">
-          <div className="relative w-full max-w-2xl bg-[#FAF9F5] border border-[#E8E5DF] rounded-2xl shadow-2xl p-5 sm:p-8 my-auto max-h-[92dvh] overflow-y-auto">
-            <h3 className="font-serif text-2xl text-[#171717] mb-4">
-              {editingPropertyId ? 'Edit Property Listing' : 'Create New Luxury Listing'}
-            </h3>
+          <div className="relative w-full max-w-2xl bg-[#FAF9F5] border border-[#E8E5DF] rounded-2xl shadow-2xl p-4 sm:p-8 my-auto max-h-[92dvh] overflow-y-auto">
+            <div className="flex items-center justify-between gap-2 mb-4">
+              <h3 className="font-serif text-xl sm:text-2xl text-[#171717]">
+                {editingPropertyId ? 'Edit Property Listing' : 'Create New Property Listing'}
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsPropertyModalOpen(false)}
+                className="p-1.5 rounded-lg text-stone-500 hover:text-stone-900 hover:bg-stone-200/70 transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
             <form onSubmit={handleSaveProperty} className="space-y-4">
               <div>
@@ -1584,7 +1599,7 @@ export default function AdminPage() {
                   required
                   value={propertyFormData.title}
                   onChange={(e) => setPropertyFormData({ ...propertyFormData, title: e.target.value })}
-                  className="w-full bg-white border border-[#E8E5DF] px-3 py-2 rounded text-xs"
+                  className="w-full bg-white border border-[#E8E5DF] px-3 py-2.5 rounded-lg text-base sm:text-xs"
                 />
               </div>
 
@@ -1595,15 +1610,19 @@ export default function AdminPage() {
                     type="text"
                     value={propertyFormData.tagline}
                     onChange={(e) => setPropertyFormData({ ...propertyFormData, tagline: e.target.value })}
-                    className="w-full bg-white border border-[#E8E5DF] px-3 py-2 rounded text-xs"
+                    className="w-full bg-white border border-[#E8E5DF] px-3 py-2.5 rounded-lg text-base sm:text-xs"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium text-stone-700 mb-1">Price (INR Number) *</label>
+                  <label className="block text-xs font-medium text-stone-700 mb-1">
+                    Price (INR · ₹ 40L – ₹ 90L Max) *
+                  </label>
                   <input
                     type="number"
                     required
+                    min={propertyFormData.listingType === 'buy' ? 4000000 : 10000}
+                    max={propertyFormData.listingType === 'buy' ? 9000000 : 500000}
                     value={propertyFormData.price}
                     onChange={(e) => {
                       const num = Number(e.target.value);
@@ -1613,7 +1632,7 @@ export default function AdminPage() {
                         priceDisplay: formatINR(num)
                       });
                     }}
-                    className="w-full bg-white border border-[#E8E5DF] px-3 py-2 rounded text-xs"
+                    className="w-full bg-white border border-[#E8E5DF] px-3 py-2.5 rounded-lg text-base sm:text-xs"
                   />
                 </div>
               </div>

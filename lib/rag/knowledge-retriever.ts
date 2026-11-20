@@ -107,9 +107,9 @@ const STATIC_KNOWLEDGE: KnowledgeChunk[] = [
     title: 'Marquee Landmark Developments & New Launches',
     category: 'Project',
     url: '/projects',
-    content: `Signature Aura represents flagship residential developments:
-1. Signature Aura Baner (Baner, Pune): Modern 2 BHK residences starting ₹ 55 Lakh onwards near Nanaware Bridge & Baner High Street. Handover Q4 2026 (MahaRERA: P52100049218).
-2. Aura Sky Mumbai (Western Suburbs / Malad-Kandivali Link Corridor, Mumbai): High-rise luxury residences starting ₹ 85 Lakh onwards with panoramic sea-breeze vistas. Handover Q2 2027 (MahaRERA: P51800052341).`,
+    content: `Signature Aura represents flagship residential developments priced strictly between ₹ 40 Lakh and ₹ 90 Lakh:
+1. Signature Aura Baner (Baner, Pune): Modern 2 BHK residences priced between ₹ 40 Lakh – ₹ 75 Lakh near Nanaware Bridge & Baner High Street. Handover Q4 2026 (MahaRERA: P52100049218).
+2. Aura Sky Mumbai (Western Suburbs / Malad-Kandivali Link Corridor, Mumbai): High-rise luxury residences priced between ₹ 75 Lakh – ₹ 90 Lakh with panoramic sea-breeze vistas. Handover Q2 2027 (MahaRERA: P51800052341).`,
     tags: ['projects', 'developments', 'signature aura baner', 'aura sky', 'baner', 'pune', 'mumbai', 'new launch', '2 bhk']
   }
 ];

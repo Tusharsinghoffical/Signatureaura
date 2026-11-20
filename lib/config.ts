@@ -7,7 +7,7 @@ export const BUSINESS_CONFIG: BusinessConfig = {
   phoneNumber: "+91 88056 21111",
   phoneRaw: "+918805621111",
   whatsappNumber: "918805621111",
-  email: "Aura@gmail.com",
+  email: "auradevelopersindia@gmail.com",
   officeAddress: "Office No. 812, Millennium Towers, Near Nanaware Bridge, Baner-Sus, Pune",
   city: "Pune",
   state: "Maharashtra",

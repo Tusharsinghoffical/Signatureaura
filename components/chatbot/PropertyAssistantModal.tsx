@@ -84,10 +84,10 @@ const INITIAL_MESSAGES: Message[] = [
     id: 'welcome-1',
     role: 'assistant',
     content:
-      'Namaste. Welcome to **Signature Aura Concierge**. Ask about **Signature Aura Baner** (2 BHK starting ₹ 55 Lakh), **Aura Sky Mumbai** (starting ₹ 85 Lakh), sky penthouses, 30-year title verification, or schedule a private site visit.',
+      'Namaste. Welcome to **Signature Aura Concierge**. Ask about **Signature Aura Baner** (2 BHK starting ₹ 45 Lakh), **Aura Sky Mumbai** (starting ₹ 85 Lakh), or any property in our curated **₹ 40 Lakh – ₹ 90 Lakh** portfolio.',
     timestamp: 'Just now',
     suggestedFollowUps: [
-      'Signature Aura Baner 2 BHK ₹ 55 Lakh',
+      'Signature Aura Baner 2 BHK ₹ 45 Lakh',
       'Aura Sky Mumbai starting ₹ 85 Lakh',
       'Show penthouses in Worli Mumbai',
       '30-year property title audit',
@@ -96,7 +96,7 @@ const INITIAL_MESSAGES: Message[] = [
 ];
 
 const QUICK_TOPICS = [
-  { label: 'Baner 2 BHK', query: 'Tell me about Signature Aura 2 BHK in Baner Pune starting 55 lakh' },
+  { label: 'Baner 2 BHK', query: 'Tell me about Signature Aura 2 BHK in Baner Pune starting 45 lakh' },
   { label: 'Aura Sky Mumbai', query: 'Tell me about Aura Sky Mumbai starting 85 lakh' },
   { label: 'Worli Penthouses', query: 'Show sea-facing penthouses in Worli Mumbai' },
   { label: 'Goa Villas', query: 'Show luxury villas in Goa Assagao' },
@@ -228,7 +228,7 @@ export default function PropertyAssistantModal({
       } else if (qLower.includes('nri') || qLower.includes('fema') || qLower.includes('rbi')) {
         reply = `Our Global NRI Desk facilitates compliant acquisitions under **RBI and FEMA guidelines**, including NRE/NRO remittance structuring, Form 15CA/CB repatriation advisory, Power of Attorney execution, and virtual Matterport tours.`;
       } else {
-        reply = `Welcome to Signature Aura Developers & Advisory. Explore flagship projects **Signature Aura Baner** (2 BHK from ₹ 55 Lakh) and **Aura Sky Mumbai** (from ₹ 85 Lakh), or ask about penthouses, Goan villas, and Grade-A commercial floors.`;
+        reply = `Welcome to Signature Aura Developers & Advisory. Explore flagship projects **Signature Aura Baner** (2 BHK from ₹ 45 Lakh) and **Aura Sky Mumbai** (from ₹ 85 Lakh), or browse all residences priced strictly between **₹ 40 Lakh – ₹ 90 Lakh**.`;
       }
 
       const phoneMatch = query.match(/(\+?\d[\d\s-]{8,})/);
@@ -286,7 +286,7 @@ export default function PropertyAssistantModal({
           'Conversation cleared. How may our advisory desk help with **Signature Aura Baner**, **Aura Sky Mumbai**, or other properties?',
         timestamp: 'Just now',
         suggestedFollowUps: [
-          'Signature Aura Baner 2 BHK ₹ 55 Lakh',
+          'Signature Aura Baner 2 BHK ₹ 45 Lakh',
           'Aura Sky Mumbai starting ₹ 85 Lakh',
           '30-year title audit protocol',
         ],

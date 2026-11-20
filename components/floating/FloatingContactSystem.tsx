@@ -347,12 +347,12 @@ export default function FloatingContactSystem() {
                       onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
                       className="w-full bg-white border border-[#E8E5DF] focus:border-[#171717] focus:outline-none px-3.5 py-2.5 rounded text-base sm:text-sm text-[#171717]"
                     >
-                      <option value="">Select Range</option>
-                      <option value="₹ 5 Cr – ₹ 10 Cr">₹ 5 Cr – ₹ 10 Cr</option>
-                      <option value="₹ 10 Cr – ₹ 20 Cr">₹ 10 Cr – ₹ 20 Cr</option>
-                      <option value="₹ 20 Cr – ₹ 50 Cr">₹ 20 Cr – ₹ 50 Cr</option>
-                      <option value="₹ 50 Cr+ Ultra Luxury">₹ 50 Cr+ Ultra Luxury</option>
-                      <option value="Luxury Lease (₹ 2L - ₹ 10L / mo)">Luxury Lease (₹ 2L - ₹ 10L / mo)</option>
+                      <option value="">Select Range (₹ 40 Lakh – ₹ 90 Lakh)</option>
+                      <option value="₹ 40 Lakh – ₹ 55 Lakh">₹ 40 Lakh – ₹ 55 Lakh</option>
+                      <option value="₹ 55 Lakh – ₹ 70 Lakh">₹ 55 Lakh – ₹ 70 Lakh</option>
+                      <option value="₹ 70 Lakh – ₹ 85 Lakh">₹ 70 Lakh – ₹ 85 Lakh</option>
+                      <option value="₹ 85 Lakh – ₹ 90 Lakh">₹ 85 Lakh – ₹ 90 Lakh</option>
+                      <option value="Monthly Lease (₹ 45k – ₹ 85k / mo)">Monthly Lease (₹ 45k – ₹ 85k / mo)</option>
                     </select>
                   </div>
                 </div>

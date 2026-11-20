@@ -237,7 +237,7 @@ export default function RootLayout({
             name: 'What trophy properties are represented by Signature Aura in Mumbai and Goa?',
             acceptedAnswer: {
               '@type': 'Answer',
-              text: 'Signature Aura represents iconic trophy addresses including The Worli Horizon Triplex Penthouse (₹34.50 Cr) on Worli Sea Face, Foster + Partners\' The Aurelia Reserve, and freehold Portuguese luxury villas like Sol de Goa in Assagao, North Goa.',
+              text: 'Signature Aura represents curated residences and flagship developments priced between ₹40 Lakh and ₹90 Lakh, including Signature Aura Baner in Pune (₹40 Lakh – ₹75 Lakh), Aura Sky Mumbai (₹75 Lakh – ₹90 Lakh), and The Worli Horizon Penthouse (₹90 Lakh).',
             },
           },
           {

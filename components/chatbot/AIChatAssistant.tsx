@@ -34,7 +34,7 @@ export const CHAT_CONFIG = {
   WEBSITE_NAME: "Signature Aura Developers",
   FOUNDER_NAME: "Alex Mercer & Rakesh Desale Patil",
   FOUNDER_PHONE_WHATSAPP: "918851619647", // International format without +
-  PRIMARY_EMAIL: "contact@mybrand.com",
+  PRIMARY_EMAIL: "auradevelopersindia@gmail.com",
   HEAD_OFFICE: "Office No. 812, Millennium Towers, Baner-Sus, Pune, Maharashtra 411021",
   CORE_SERVICES: [
     "AI Agent & Workflow Automation (n8n, Python, Zapier, Webhooks)",

@@ -582,77 +582,132 @@ export default function HomePage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {SAMPLE_PROJECTS.map((proj) => (
-                <div 
-                  key={proj.id}
-                  className="bg-[#222222] border border-[#333333] hover:border-[#B99A63]/60 rounded-xl overflow-hidden shadow-lg transition-all group flex flex-col justify-between"
-                >
-                  <div className="relative aspect-[16/10] overflow-hidden bg-stone-900">
-                    <Image
-                      src={getOptimizedImageUrl(proj.heroImage, 640, 75)}
-                      alt={proj.title}
-                      fill
-                      loading="lazy"
-                      placeholder="blur"
-                      blurDataURL={SHIMMER_BLUR_DATA_URL}
-                      sizes="(max-width: 1024px) 100vw, 33vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                      referrerPolicy="no-referrer"
-                    />
-                    <div className="absolute top-3 left-3 bg-[#171717]/80 text-[#B99A63] text-[10px] tracking-wider uppercase px-2.5 py-1 rounded backdrop-blur-xs font-medium">
-                      {proj.status}
+              {SAMPLE_PROJECTS.map((proj) => {
+                const photoCount = proj.constructionGallery?.length || 0;
+                const videoCount = proj.constructionVideos?.length || 0;
+                const previewPhotos = proj.constructionGallery?.slice(0, 4) || [];
+
+                return (
+                  <div 
+                    key={proj.id}
+                    className="bg-[#222222] border border-[#333333] hover:border-[#B99A63]/60 rounded-xl overflow-hidden shadow-lg transition-all group flex flex-col justify-between"
+                  >
+                    <div className="relative aspect-[16/10] overflow-hidden bg-stone-900">
+                      <Image
+                        src={getOptimizedImageUrl(proj.heroImage, 640, 75)}
+                        alt={proj.title}
+                        fill
+                        loading="lazy"
+                        placeholder="blur"
+                        blurDataURL={SHIMMER_BLUR_DATA_URL}
+                        sizes="(max-width: 1024px) 100vw, 33vw"
+                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                        referrerPolicy="no-referrer"
+                      />
+                      <div className="absolute top-3 left-3 bg-[#171717]/80 text-[#B99A63] text-[10px] tracking-wider uppercase px-2.5 py-1 rounded backdrop-blur-xs font-medium">
+                        {proj.status}
+                      </div>
+                      {(photoCount > 0 || videoCount > 0) && (
+                        <div className="absolute bottom-3 left-3 bg-[#171717]/85 text-stone-200 text-[10px] tracking-wide px-2.5 py-1 rounded backdrop-blur-xs font-medium">
+                          {photoCount} Site Photos{videoCount > 0 ? ` · ${videoCount} Videos` : ''}
+                        </div>
+                      )}
                     </div>
-                  </div>
 
-                  <div className="p-6 flex-1 flex flex-col justify-between">
-                    <div>
-                      <span className="text-xs text-[#B99A63] block mb-1">
-                        {proj.locality}, {proj.city}
-                      </span>
-                      <h3 className="font-serif text-2xl text-white group-hover:text-[#B99A63] transition-colors">
-                        {proj.title}
-                      </h3>
-                      <p className="text-xs text-stone-400 mt-2 leading-relaxed">
-                        {proj.tagline}
-                      </p>
+                    <div className="p-6 flex-1 flex flex-col justify-between">
+                      <div>
+                        <span className="text-xs text-[#B99A63] block mb-1">
+                          {proj.locality}, {proj.city}
+                        </span>
+                        <h3 className="font-serif text-2xl text-white group-hover:text-[#B99A63] transition-colors">
+                          {proj.title}
+                        </h3>
+                        <p className="text-xs text-stone-400 mt-2 leading-relaxed">
+                          {proj.tagline}
+                        </p>
 
-                      <div className="mt-4 pt-4 border-t border-[#333333] space-y-1.5 text-xs text-stone-300">
-                        <div className="flex justify-between">
-                          <span className="text-stone-500">Starting From:</span>
-                          <span className="font-medium text-white">{proj.priceStartingFrom}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-stone-500">Handover:</span>
-                          <span>{proj.completionDate}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-stone-500">RERA:</span>
-                          <span className="text-stone-400 font-mono text-[11px]">{proj.reraNumber}</span>
+                        {previewPhotos.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-[#333333]">
+                            <div className="flex items-center justify-between text-[11px] mb-2">
+                              <span className="text-stone-400 uppercase tracking-wider font-semibold">
+                                Project Work Gallery
+                              </span>
+                              <Link
+                                href={`/projects/${proj.slug}#project-work`}
+                                className="text-[#B99A63] hover:text-white transition-colors font-medium"
+                              >
+                                Inspect All
+                              </Link>
+                            </div>
+                            <div className="grid grid-cols-4 gap-2">
+                              {previewPhotos.map((item) => (
+                                <Link
+                                  key={item.id}
+                                  href={`/projects/${proj.slug}#project-work`}
+                                  className="relative aspect-[4/3] rounded overflow-hidden bg-stone-900 border border-[#333333] hover:border-[#B99A63] transition-colors"
+                                  title={item.title}
+                                >
+                                  <Image
+                                    src={getOptimizedImageUrl(item.imageUrl, 320, 75)}
+                                    alt={item.title}
+                                    fill
+                                    loading="lazy"
+                                    sizes="120px"
+                                    className="object-cover"
+                                    referrerPolicy="no-referrer"
+                                  />
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mt-4 pt-4 border-t border-[#333333] space-y-1.5 text-xs text-stone-300">
+                          <div className="flex justify-between">
+                            <span className="text-stone-500">Starting From:</span>
+                            <span className="font-medium text-white">{proj.priceStartingFrom}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-stone-500">Handover:</span>
+                            <span>{proj.completionDate}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-stone-500">RERA:</span>
+                            <span className="text-stone-400 font-mono text-[11px]">{proj.reraNumber}</span>
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="mt-6 pt-4 border-t border-[#333333] flex items-center justify-between">
-                      <Link
-                        href={`/projects/${proj.slug}`}
-                        className="text-xs font-semibold uppercase tracking-wider text-white group-hover:text-[#B99A63] flex items-center gap-1 transition-colors"
-                      >
-                        <span>Project Dossier</span>
-                        <ArrowUpRight className="w-3.5 h-3.5" />
-                      </Link>
-                      
-                      <a
-                        href={getWhatsAppLink(`Hello Signature Aura, please share the confidential brochure and unit plans for ${proj.title}.`)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs text-[#B99A63] hover:text-white transition-colors"
-                      >
-                        Enquire on WhatsApp
-                      </a>
+                      <div className="mt-6 pt-4 border-t border-[#333333] flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-4">
+                          <Link
+                            href={`/projects/${proj.slug}`}
+                            className="text-xs font-semibold uppercase tracking-wider text-white group-hover:text-[#B99A63] flex items-center gap-1 transition-colors"
+                          >
+                            <span>Project Dossier</span>
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </Link>
+                          <Link
+                            href={`/projects/${proj.slug}#project-work`}
+                            className="text-xs font-medium text-stone-300 hover:text-[#B99A63] transition-colors"
+                          >
+                            Project Work
+                          </Link>
+                        </div>
+                        
+                        <a
+                          href={getWhatsAppLink(`Hello Signature Aura, please share the confidential brochure and unit plans for ${proj.title}.`)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#B99A63] hover:text-white transition-colors"
+                        >
+                          Enquire on WhatsApp
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>

@@ -134,11 +134,23 @@ export interface SiteVisit {
 export interface ConstructionWorkUpdate {
   id: string;
   title: string;
-  category: 'construction' | 'masonry' | 'civil_inspection' | 'elevation' | 'amenities';
+  category: 'construction' | 'masonry' | 'civil_inspection' | 'elevation' | 'amenities' | 'interiors';
   stage: string;
   date: string;
   description: string;
   imageUrl: string;
+  badge: string;
+}
+
+export interface ProjectWorkVideo {
+  id: string;
+  title: string;
+  stage: string;
+  date: string;
+  duration: string;
+  description: string;
+  videoUrl: string;
+  posterUrl?: string;
   badge: string;
 }
 
@@ -158,6 +170,7 @@ export interface ProjectDevelopment {
   heroImage: string;
   galleryImages: string[];
   constructionGallery?: ConstructionWorkUpdate[];
+  constructionVideos?: ProjectWorkVideo[];
   constructionMilestones?: {
     stage: string;
     progressPercentage: number;
