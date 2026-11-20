@@ -726,43 +726,43 @@ export default function HomePage() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center">
               
               <div className="bg-white lg:bg-transparent p-5 lg:p-0 rounded-xl lg:rounded-none border border-[#E8E5DF] lg:border-0 lg:border-r lg:border-[#E8E5DF] shadow-2xs lg:shadow-none">
-                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal">
-                  ₹ 4,200+ Cr
+                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal tabular-nums">
+                  ₹ 180+ Cr
                 </span>
                 <span className="text-[11px] sm:text-xs tracking-widest uppercase text-stone-600 mt-2 block font-medium">
-                  Transaction Volume Closed
+                  Property Value Advised
                 </span>
-                <p className="text-[11px] text-stone-600 mt-1">Across Prime Indian Corridors</p>
+                <p className="text-[11px] text-stone-600 mt-1">Across Pune & Mumbai Corridors</p>
               </div>
 
               <div className="bg-white lg:bg-transparent p-5 lg:p-0 rounded-xl lg:rounded-none border border-[#E8E5DF] lg:border-0 lg:border-r lg:border-[#E8E5DF] shadow-2xs lg:shadow-none">
-                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal">
-                  1,200+
+                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal tabular-nums">
+                  100%
                 </span>
                 <span className="text-[11px] sm:text-xs tracking-widest uppercase text-stone-600 mt-2 block font-medium">
-                  Verified Properties Listed
+                  MahaRERA & Title Verified
                 </span>
-                <p className="text-[11px] text-stone-600 mt-1">Freehold & RERA Certified</p>
+                <p className="text-[11px] text-stone-600 mt-1">30-Year Legal Due Diligence</p>
               </div>
 
               <div className="bg-white lg:bg-transparent p-5 lg:p-0 rounded-xl lg:rounded-none border border-[#E8E5DF] lg:border-0 lg:border-r lg:border-[#E8E5DF] shadow-2xs lg:shadow-none">
-                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal">
-                  18+ Years
+                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal tabular-nums">
+                  10+ Years
                 </span>
                 <span className="text-[11px] sm:text-xs tracking-widest uppercase text-stone-600 mt-2 block font-medium">
-                  Institutional Advisory
+                  Market Experience
                 </span>
-                <p className="text-[11px] text-stone-600 mt-1">Founded & Headquartered in Mumbai</p>
+                <p className="text-[11px] text-stone-600 mt-1">Headquartered in Baner-Sus, Pune</p>
               </div>
 
               <div className="bg-white lg:bg-transparent p-5 lg:p-0 rounded-xl lg:rounded-none border border-[#E8E5DF] lg:border-0 shadow-2xs lg:shadow-none">
-                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal">
-                  98.4%
+                <span className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[#171717] block font-normal tabular-nums">
+                  320+
                 </span>
                 <span className="text-[11px] sm:text-xs tracking-widest uppercase text-stone-600 mt-2 block font-medium">
-                  Client Retention Rate
+                  Families & Investors Served
                 </span>
-                <p className="text-[11px] text-stone-600 mt-1">HNIs, Family Offices & Corporates</p>
+                <p className="text-[11px] text-stone-600 mt-1">Homebuyers, NRIs & Corporates</p>
               </div>
 
             </div>
@@ -802,7 +802,7 @@ export default function HomePage() {
                   &ldquo;Signature Aura™ represents discretion, deep market intelligence, and true legal diligence.&rdquo;
                 </p>
                 <span className="text-[10px] text-stone-500 uppercase tracking-widest font-semibold block mt-2">
-                  Forbes Real Estate Advisory Review
+                  Verified Homebuyer · Baner, Pune
                 </span>
               </div>
             </div>
@@ -981,10 +981,10 @@ export default function HomePage() {
                 Client Accolades
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl text-[#171717] mt-1">
-                Trusted by Leaders & Family Offices
+                Trusted by Homebuyers & Investors
               </h2>
               <p className="text-sm text-stone-600 mt-2">
-                Uncompromising discretion in high-stakes residential acquisitions and corporate relocations.
+                Transparent documentation, clear titles, and personal guidance across every residential and commercial purchase.
               </p>
             </div>
 

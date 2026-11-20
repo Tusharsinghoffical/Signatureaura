@@ -389,7 +389,7 @@ export default function PropertyAssistantModal({
       <div
         role="region"
         aria-label="Minimized Property Concierge"
-        className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 sm:bottom-6 sm:right-6 z-50 pointer-events-auto animate-in slide-in-from-bottom-2 duration-200"
+        className="fixed bottom-[max(0.75rem,env(safe-area-inset-bottom))] right-3 sm:bottom-6 sm:right-6 z-[90] pointer-events-auto animate-in slide-in-from-bottom-2 duration-200"
       >
         <div
           onClick={() => setIsMinimized(false)}
@@ -428,7 +428,7 @@ export default function PropertyAssistantModal({
   // =========================================================================
   return (
     <div
-      className={`fixed inset-0 z-50 flex transition-all duration-200 pointer-events-none ${
+      className={`fixed inset-0 z-[90] flex transition-all duration-200 pointer-events-none ${
         isExpanded
           ? 'items-end sm:items-center justify-center p-0 sm:p-5'
           : 'items-end justify-end p-0 sm:p-5'
@@ -458,18 +458,19 @@ export default function PropertyAssistantModal({
         `}
       >
         {/* Single Architectural Dark Header */}
-        <header className="bg-[#141416] text-[#FAF9F5] px-3.5 sm:px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-3 border-b border-[#26262A] shrink-0">
-          <div className="flex items-center justify-between gap-2.5">
+        <header className="bg-[#141416] text-[#FAF9F5] px-3.5 sm:px-4 pt-[max(0.65rem,env(safe-area-inset-top))] pb-2.5 sm:py-3 border-b border-[#26262A] shrink-0">
+          <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="w-9 h-9 rounded-full bg-[#1E1E22] border border-[#B99A63]/60 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1E1E22] border border-[#B99A63]/60 flex items-center justify-center shrink-0">
                 <BotMessageSquare className="w-4 h-4 text-[#E8D39E]" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-serif text-[15px] font-medium text-[#FAF9F5] truncate leading-snug">
+                <h3 className="font-serif text-sm sm:text-[15px] font-medium text-[#FAF9F5] truncate leading-snug">
                   Signature Aura Concierge
                 </h3>
-                <p className="text-[11px] text-stone-400 truncate leading-tight">
-                  Verified Properties & Advisory Desk
+                <p className="text-[11px] text-stone-400 truncate leading-tight flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
+                  <span className="truncate">Verified Properties & Advisory</span>
                 </p>
               </div>
             </div>
@@ -523,12 +524,12 @@ export default function PropertyAssistantModal({
         </header>
 
         {/* Unified Segmented Navigation + Quick Connect Bar */}
-        <div className="bg-[#F3EFE6] border-b border-[#E5E0D5] px-3 py-2 flex items-center justify-between gap-2 shrink-0">
+        <div className="bg-[#F3EFE6] border-b border-[#E5E0D5] px-3 py-1.5 sm:py-2 flex items-center justify-between gap-2 shrink-0">
           <div className="inline-flex items-center bg-[#E7E2D6] p-0.5 rounded-lg min-w-0">
             <button
               type="button"
               onClick={() => setActiveTab('chat')}
-              className={`touch-manipulation px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[36px] ${
+              className={`touch-manipulation px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[34px] ${
                 activeTab === 'chat'
                   ? 'bg-[#141416] text-[#FAF9F5] shadow-2xs'
                   : 'text-stone-700 hover:text-[#141416]'
@@ -542,7 +543,7 @@ export default function PropertyAssistantModal({
             <button
               type="button"
               onClick={() => setActiveTab('inventory')}
-              className={`touch-manipulation px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[36px] tabular-nums ${
+              className={`touch-manipulation px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[34px] tabular-nums ${
                 activeTab === 'inventory'
                   ? 'bg-[#141416] text-[#FAF9F5] shadow-2xs'
                   : 'text-stone-700 hover:text-[#141416]'
@@ -558,7 +559,7 @@ export default function PropertyAssistantModal({
               href={`tel:${BUSINESS_CONFIG.phoneRaw}`}
               title="Call Advisory Desk"
               aria-label="Call Advisory Desk"
-              className="touch-manipulation inline-flex items-center justify-center gap-1 w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-lg bg-white border border-[#E2DDD2] hover:border-[#B99A63] text-[#171717] text-xs font-medium transition-colors sm:min-h-[36px]"
+              className="touch-manipulation inline-flex items-center justify-center gap-1 w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-lg bg-white border border-[#E2DDD2] hover:border-[#B99A63] text-[#171717] text-xs font-medium transition-colors sm:min-h-[34px]"
             >
               <Phone className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-[#845E1B]" />
               <span className="hidden sm:inline">Call</span>
@@ -572,7 +573,7 @@ export default function PropertyAssistantModal({
               rel="noopener noreferrer"
               title="Chat on WhatsApp"
               aria-label="Chat on WhatsApp"
-              className="touch-manipulation inline-flex items-center justify-center gap-1 w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1FB858] text-white text-xs font-medium transition-colors sm:min-h-[36px] whitespace-nowrap"
+              className="touch-manipulation inline-flex items-center justify-center gap-1 w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1FB858] text-white text-xs font-medium transition-colors sm:min-h-[34px] whitespace-nowrap"
             >
               <MessageCircle className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
               <span className="hidden sm:inline">WhatsApp</span>
@@ -595,14 +596,18 @@ export default function PropertyAssistantModal({
            ========================================================================= */}
         {activeTab === 'chat' && (
           <>
-            {/* Light Horizontal Quick Prompts Strip */}
-            <div className="bg-white border-b border-[#EAE5DA] px-3 py-2 flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+            {/* Horizontal Quick Prompts Strip: Always visible on desktop/tablet; on mobile hidden once conversation starts so keyboard leaves ample room */}
+            <div
+              className={`bg-white border-b border-[#EAE5DA] px-3 py-2 items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0 ${
+                messages.length <= 1 ? 'flex' : 'hidden sm:flex'
+              }`}
+            >
               {QUICK_TOPICS.map((item) => (
                 <button
                   key={item.label}
                   type="button"
                   onClick={() => handleSend(item.query)}
-                  className="touch-manipulation whitespace-nowrap shrink-0 text-xs font-medium text-stone-700 hover:text-[#141416] bg-[#FAF9F5] hover:bg-[#F0ECE2] border border-[#E6E1D6] hover:border-[#B99A63]/60 px-3 py-1.5 rounded-lg transition-colors min-h-[36px]"
+                  className="touch-manipulation whitespace-nowrap shrink-0 text-xs font-medium text-stone-700 hover:text-[#141416] bg-[#FAF9F5] hover:bg-[#F0ECE2] border border-[#E6E1D6] hover:border-[#B99A63]/60 px-3 py-1.5 rounded-lg transition-colors min-h-[34px]"
                 >
                   {item.label}
                 </button>
@@ -950,9 +955,9 @@ export default function PropertyAssistantModal({
                 e.preventDefault();
                 handleSend();
               }}
-              className="p-3 bg-white border-t border-[#E6E1D6] shrink-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+              className="px-3 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] bg-white border-t border-[#E6E1D6] shrink-0"
             >
-              <div className="flex items-center gap-2 bg-[#FAF9F5] border border-[#DFD9CE] focus-within:border-[#B99A63] focus-within:bg-white rounded-xl pl-3.5 pr-1.5 py-1.5 transition-colors">
+              <div className="flex items-center gap-2 bg-[#FAF9F5] border border-[#DFD9CE] focus-within:border-[#B99A63] focus-within:bg-white rounded-2xl pl-3.5 pr-1.5 py-1.5 transition-colors">
                 <input
                   ref={inputRef}
                   type="text"
@@ -960,13 +965,13 @@ export default function PropertyAssistantModal({
                   onChange={(e) => setInput(e.target.value)}
                   suppressHydrationWarning
                   placeholder="Ask about Baner 2 BHK, Aura Sky, prices..."
-                  className="flex-1 bg-transparent focus:outline-hidden text-base sm:text-xs text-[#141416] placeholder:text-stone-400 min-h-[38px]"
+                  className="flex-1 min-w-0 bg-transparent focus:outline-hidden text-base sm:text-xs text-[#141416] placeholder:text-stone-400 min-h-[38px]"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
                   aria-label="Send message"
-                  className="touch-manipulation bg-[#141416] hover:bg-[#B99A63] disabled:opacity-35 text-white w-10 h-10 rounded-lg transition-colors flex items-center justify-center shrink-0"
+                  className="touch-manipulation bg-[#141416] hover:bg-[#B99A63] disabled:opacity-35 text-white w-10 h-10 rounded-xl transition-colors flex items-center justify-center shrink-0"
                 >
                   <Send className="w-4 h-4" />
                 </button>
