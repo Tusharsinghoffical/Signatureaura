@@ -214,7 +214,7 @@ export default function HomePage() {
 
             {/* Supporting description */}
             <p className="mt-3 sm:mt-5 text-xs sm:text-base lg:text-lg text-stone-300 max-w-2xl font-light leading-relaxed text-center w-full min-w-0 px-2">
-              Discreet property advisory, sea-facing penthouses, gated Goan villas, and prime commercial floors in India’s most distinguished addresses.
+              MahaRERA-verified 2 & 3 BHK residences and direct developer advisory across Pune, Nashik, and Panvel (Mumbai).
             </p>
 
             {/* Property Search Interface Card */}
@@ -272,13 +272,10 @@ export default function HomePage() {
                       onChange={(e) => setSelectedCity(e.target.value)}
                       className="w-full bg-[#FAF9F5] border border-[#E8E5DF] focus:border-[#171717] focus:outline-none pl-9 pr-3 py-2.5 min-h-[44px] rounded-lg text-base sm:text-sm text-[#171717]"
                     >
-                      <option value="All Cities">All Cities (India)</option>
-                      <option value="Mumbai">Mumbai (Worli, BKC, Bandra)</option>
-                      <option value="Delhi NCR">Delhi NCR (Golf Course Rd)</option>
-                      <option value="Goa">Goa (Assagao, Candolim)</option>
-                      <option value="Bengaluru">Bengaluru (CBD & Indiranagar)</option>
-                      <option value="Hyderabad">Hyderabad (Jubilee Hills)</option>
-                      <option value="Pune">Pune (Koregaon Park)</option>
+                      <option value="All Cities">All 3 Locations</option>
+                      <option value="Pune">Pune (Baner-Sus & Balewadi)</option>
+                      <option value="Nashik">Nashik (Gangapur Road)</option>
+                      <option value="Panvel, Mumbai">Panvel, Mumbai (New Panvel)</option>
                     </select>
                   </div>
                 </div>
@@ -315,7 +312,7 @@ export default function HomePage() {
                     <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
                     <input
                       type="text"
-                      placeholder="e.g. Sea Face, Private Pool..."
+                      placeholder="e.g. Baner, Gangapur Road, New Panvel..."
                       value={keyword}
                       onChange={(e) => setKeyword(e.target.value)}
                       suppressHydrationWarning
@@ -360,7 +357,7 @@ export default function HomePage() {
                 Featured Properties & Penthouses
               </h2>
               <p className="text-sm text-stone-600 mt-2 max-w-xl">
-                Handpicked benchmark residences across Mumbai, Delhi NCR, and Goa offering prime locations, verified ownership, and exquisite finishes.
+                Handpicked MahaRERA-verified residences across Pune, Nashik, and Panvel (Mumbai) offering prime connectivity, clear titles, and modern finishes.
               </p>
             </div>
 
@@ -368,7 +365,7 @@ export default function HomePage() {
               href="/properties"
               className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#171717] hover:text-[#B99A63] uppercase transition-colors"
             >
-              <span>View All 16 Properties</span>
+              <span>View All {SAMPLE_PROPERTIES.length} Properties</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -393,14 +390,14 @@ export default function HomePage() {
                 Explore by Property Category
               </h2>
               <p className="text-sm text-stone-600 mt-2">
-                Tailored discovery for discerning buyers, whether seeking a tranquil coastal estate or an iconic downtown penthouse.
+                Tailored residential discovery across our three core Maharashtra growth corridors.
               </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               
               <Link 
-                href="/properties?category=luxury_penthouse" 
+                href="/properties?city=Pune" 
                 className="group bg-white p-6 rounded-xl border border-[#E8E5DF] hover:border-[#B99A63] shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div>
@@ -408,20 +405,20 @@ export default function HomePage() {
                     <Building className="w-6 h-6" />
                   </div>
                   <h3 className="font-serif text-lg text-[#171717] group-hover:text-[#B99A63] transition-colors">
-                    Sky Penthouses
+                    Pune IT Corridor Homes
                   </h3>
                   <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
-                    Duplex and triplex residences with private pools, sky gardens, and panoramic city vistas.
+                    Smart 2 & 3 BHK MahaRERA residences near Baner High Street, Sus-Balewadi, and Hinjawadi IT Park.
                   </p>
                 </div>
                 <div className="mt-5 pt-3 border-t border-[#E8E5DF] flex items-center justify-between text-xs text-[#777777]">
-                  <span>Worli, BKC, Bengaluru</span>
+                  <span>Baner-Sus, Balewadi</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#B99A63]" />
                 </div>
               </Link>
 
               <Link 
-                href="/properties?category=villa" 
+                href="/properties?city=Panvel%2C%20Mumbai" 
                 className="group bg-white p-6 rounded-xl border border-[#E8E5DF] hover:border-[#B99A63] shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div>
@@ -429,20 +426,20 @@ export default function HomePage() {
                     <Building2 className="w-6 h-6" />
                   </div>
                   <h3 className="font-serif text-lg text-[#171717] group-hover:text-[#B99A63] transition-colors">
-                    Heritage & Modern Villas
+                    Panvel High-Rise Towers
                   </h3>
                   <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
-                    Portuguese estates in Assagao, private pools in Candolim, and citadels in Jubilee Hills.
+                    Modern 2 BHK high-rise residences and OC-ready homes near Navi Mumbai Airport & Atal Setu.
                   </p>
                 </div>
                 <div className="mt-5 pt-3 border-t border-[#E8E5DF] flex items-center justify-between text-xs text-[#777777]">
-                  <span>Goa, Hyderabad</span>
+                  <span>New Panvel, Mumbai</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#B99A63]" />
                 </div>
               </Link>
 
               <Link 
-                href="/properties?category=commercial" 
+                href="/properties?city=Nashik" 
                 className="group bg-white p-6 rounded-xl border border-[#E8E5DF] hover:border-[#B99A63] shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div>
@@ -450,20 +447,20 @@ export default function HomePage() {
                     <Key className="w-6 h-6" />
                   </div>
                   <h3 className="font-serif text-lg text-[#171717] group-hover:text-[#B99A63] transition-colors">
-                    Commercial & Grade-A
+                    Nashik Green Enclaves
                   </h3>
                   <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
-                    Institutional office floor plates in BKC, Cyber City, and Connaught Place retail showrooms.
+                    Spacious ready-to-move 3 BHK homes along Gangapur Road with calm green vistas and zero GST.
                   </p>
                 </div>
                 <div className="mt-5 pt-3 border-t border-[#E8E5DF] flex items-center justify-between text-xs text-[#777777]">
-                  <span>BKC, Gurgaon, CP</span>
+                  <span>Gangapur Road, Nashik</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#B99A63]" />
                 </div>
               </Link>
 
               <Link 
-                href="/properties?listingType=rent" 
+                href="/projects" 
                 className="group bg-white p-6 rounded-xl border border-[#E8E5DF] hover:border-[#B99A63] shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
               >
                 <div>
@@ -471,14 +468,14 @@ export default function HomePage() {
                     <Sparkles className="w-6 h-6" />
                   </div>
                   <h3 className="font-serif text-lg text-[#171717] group-hover:text-[#B99A63] transition-colors">
-                    Executive Leases
+                    Direct Flagship Launches
                   </h3>
                   <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
-                    Turn-key furnished apartments and serviced penthouses tailored for expatriates and corporate founders.
+                    Direct developer allocations with live construction walkthroughs and flexible bank loan plans.
                   </p>
                 </div>
                 <div className="mt-5 pt-3 border-t border-[#E8E5DF] flex items-center justify-between text-xs text-[#777777]">
-                  <span>Bandra, Indiranagar, BKC</span>
+                  <span>Pune & Panvel, Mumbai</span>
                   <ArrowUpRight className="w-3.5 h-3.5 text-[#B99A63]" />
                 </div>
               </Link>
@@ -494,13 +491,13 @@ export default function HomePage() {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <div>
               <span className="text-xs font-semibold tracking-widest text-[#B99A63] uppercase">
-                Geographic Presence
+                Our 3 Prime Locations
               </span>
               <h2 className="font-serif text-3xl sm:text-4xl text-[#171717] mt-1">
-                India’s Prime Real Estate Markets
+                Pune, Nashik & Panvel (Mumbai)
               </h2>
               <p className="text-sm text-stone-600 mt-2 max-w-xl">
-                Dedicated advisory desks operating in the nation’s highest capital appreciation corridors.
+                Focused advisory desks operating across Maharashtra’s three highest-value residential corridors.
               </p>
             </div>
 
@@ -508,7 +505,7 @@ export default function HomePage() {
               href="/locations"
               className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wider text-[#171717] hover:text-[#B99A63] uppercase transition-colors"
             >
-              <span>Explore All Markets</span>
+              <span>Explore All 3 Locations</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -1041,7 +1038,7 @@ export default function HomePage() {
                     Begin Your Real Estate Journey With Total Confidence
                   </h2>
                   <p className="text-sm text-stone-300 leading-relaxed font-light">
-                    Whether seeking to acquire an extraordinary primary residence, lease a prestigious corporate headquarters in BKC, or schedule a discreet private viewing, our Senior Partners are at your disposal.
+                    Whether buying your primary family home in Pune (Baner-Sus), investing in Nashik’s Gangapur Road, or booking a high-rise residence in Panvel (Mumbai), our Senior Partners are at your disposal.
                   </p>
 
                   <div className="pt-4 flex flex-wrap gap-4 text-xs">

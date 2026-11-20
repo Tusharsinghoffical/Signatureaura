@@ -13,7 +13,7 @@ export const BUSINESS_CONFIG: BusinessConfig = {
   state: "Maharashtra",
   pincode: "411021",
   reraRegistration: "",
-  announcementBarText: "Signature Aura™ Exclusive Residences & Penthouses in Baner, Balewadi, Koregaon Park & Assagao now available.",
+  announcementBarText: "Signature Aura™ MahaRERA Verified Residences in Pune (Baner-Sus), Nashik (Gangapur Road) & Panvel, Mumbai — ₹ 45L to ₹ 85L.",
   businessHours: "Monday – Saturday: 9:30 AM – 7:30 PM IST (Sunday by VIP appointment)",
   googleMapsUrl: "https://maps.google.com/?q=Millennium+Towers+Baner+Sus+Road+Pune+411021",
   socials: {

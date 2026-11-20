@@ -14,7 +14,7 @@ const KEYS = {
   SITE_VISITS: 'sa_site_visits_v1',
   DELETED_LEADS: 'sa_deleted_leads_v1',
   DELETED_VISITS: 'sa_deleted_visits_v1',
-  PROPERTIES: 'sa_properties_v1',
+  PROPERTIES: 'sa_properties_v2',
   SETTINGS: 'sa_settings_v1',
   SAVED_PROPERTIES: 'sa_saved_ids_v1',
   ADMIN_AUTH: 'sa_admin_auth_v1',

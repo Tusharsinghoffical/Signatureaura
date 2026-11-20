@@ -26,8 +26,8 @@ const STATIC_KNOWLEDGE: KnowledgeChunk[] = [
     title: 'Signature Aura Pvt. Ltd. Overview & Head Office',
     category: 'Company',
     url: '/about',
-    content: `Signature Aura Pvt. Ltd. (Signature Aura™) is a premier institutional real estate advisory firm. Headquartered at Office No. 812, Millennium Towers, Near Nanaware Bridge, Baner-Sus, Pune 411021, Maharashtra. Phone: ${BUSINESS_CONFIG.phoneNumber}, Email: ${BUSINESS_CONFIG.email}. Operates across prime luxury corridors: Pune (Baner, Sus, Balewadi, Koregaon Park), Mumbai (Worli, BKC, Bandra), Delhi NCR (Golf Course Road, Connaught Place), Goa (Assagao, Candolim), Bengaluru, and Hyderabad. Office hours: Monday to Saturday, 9:30 AM to 7:30 PM.`,
-    tags: ['company', 'headquarters', 'pune', 'office', 'millennium towers', 'baner', 'sus', 'contact', 'hours']
+    content: `Signature Aura Pvt. Ltd. (Signature Aura™) is a Maharashtra-focused real estate development and advisory firm. Headquartered at Office No. 812, Millennium Towers, Near Nanaware Bridge, Baner-Sus, Pune 411021, Maharashtra. Phone: ${BUSINESS_CONFIG.phoneNumber}, Email: ${BUSINESS_CONFIG.email}. Operates exclusively across 3 core locations: Pune (Baner-Sus & Sus-Balewadi), Nashik (Gangapur Road), and Panvel, Mumbai (New Panvel & Panvel Expressway Corridor). Office hours: Monday to Saturday, 9:30 AM to 7:30 PM.`,
+    tags: ['company', 'headquarters', 'pune', 'nashik', 'panvel', 'mumbai', 'office', 'millennium towers', 'baner', 'sus', 'contact', 'hours']
   },
   {
     id: 'leadership-team',
@@ -70,12 +70,11 @@ const STATIC_KNOWLEDGE: KnowledgeChunk[] = [
     title: 'Stamp Duty, Registration & Transaction Costs in India',
     category: 'Legal & RERA',
     url: '/services',
-    content: `Property transaction costs guide:
-- Maharashtra (Pune / Mumbai): Stamp duty is typically 5% to 7% of agreement value plus 1% Metro Cess / LBT, plus ₹30,000 or 1% registration charges. Women buyers receive a 1% concession on residential purchases in Maharashtra.
-- Delhi NCR / Haryana (Gurgaon): Stamp duty is 5% to 7% depending on gender and municipal boundaries.
-- Goa: Stamp duty ranges between 3.5% to 5% based on property valuation brackets.
-- GST: Ready-to-move properties with Completion Certificate (CC) have 0% GST. Under-construction luxury properties attract 5% GST without Input Tax Credit.`,
-    tags: ['stamp duty', 'registration', 'gst', 'tax', 'fees', 'costs', 'charges', 'metro cess', 'completion certificate']
+    content: `Property transaction costs guide for Maharashtra (Pune, Nashik & Panvel, Mumbai):
+- Stamp Duty: Typically 5% to 7% of agreement value depending on municipal limits (PMC Pune, NMC Nashik, Panvel Municipal Corporation) plus 1% Metro Cess where applicable, and ₹30,000 or 1% registration charges.
+- Women Buyer Concession: Women homebuyers receive a 1% stamp duty concession on residential purchases in Maharashtra.
+- GST: Ready-to-move properties with Occupancy/Completion Certificate (OC/CC) — such as Aura Greens Nashik and Aura Courtyard Panvel — attract 0% GST. Under-construction properties attract 5% GST.`,
+    tags: ['stamp duty', 'registration', 'gst', 'tax', 'fees', 'costs', 'charges', 'metro cess', 'maharashtra', 'pune', 'nashik', 'panvel']
   },
   {
     id: 'site-visit-protocol',
@@ -107,10 +106,11 @@ const STATIC_KNOWLEDGE: KnowledgeChunk[] = [
     title: 'Marquee Landmark Developments & New Launches',
     category: 'Project',
     url: '/projects',
-    content: `Signature Aura represents flagship residential developments priced strictly between ₹ 40 Lakh and ₹ 90 Lakh:
-1. Signature Aura Baner (Baner, Pune): Modern 2 BHK residences priced between ₹ 40 Lakh – ₹ 75 Lakh near Nanaware Bridge & Baner High Street. Handover Q4 2026 (MahaRERA: P52100049218).
-2. Aura Sky Mumbai (Western Suburbs / Malad-Kandivali Link Corridor, Mumbai): High-rise luxury residences priced between ₹ 75 Lakh – ₹ 90 Lakh with panoramic sea-breeze vistas. Handover Q2 2027 (MahaRERA: P51800052341).`,
-    tags: ['projects', 'developments', 'signature aura baner', 'aura sky', 'baner', 'pune', 'mumbai', 'new launch', '2 bhk']
+    content: `Signature Aura represents curated MahaRERA-verified residences across Pune, Nashik, and Panvel (Mumbai), priced between ₹ 45 Lakh and ₹ 85 Lakh:
+1. Signature Aura Baner (Baner-Sus, Pune): Modern 2 BHK residences starting ₹ 45 Lakh (MahaRERA: P52100049218) and Signature Aura Crest 3 BHK in Sus-Balewadi at ₹ 68 Lakh.
+2. Aura Sky Panvel & Aura Courtyard (Panvel, Mumbai): High-rise 2 BHK residences in New Panvel starting ₹ 58 Lakh – ₹ 85 Lakh near Navi Mumbai International Airport & Atal Setu (MahaRERA: P52000052341).
+3. Aura Greens (Gangapur Road, Nashik): Ready-to-move 3 BHK homes at ₹ 52 Lakh with zero GST (MahaRERA: P51600046890).`,
+    tags: ['projects', 'developments', 'signature aura baner', 'aura sky', 'panvel', 'nashik', 'gangapur road', 'baner', 'pune', 'mumbai', '2 bhk', '3 bhk']
   }
 ];
 
@@ -209,16 +209,16 @@ Prime Localities: ${loc.popularLocalities.join(', ')}`,
       if (textToSearch.includes(token)) score += 1;
     }
 
-    // Exact city matches
-    const cities = ['mumbai', 'pune', 'goa', 'delhi', 'gurgaon', 'bengaluru', 'bangalore', 'hyderabad'];
+    // Exact city matches (Pune, Nashik, Panvel / Mumbai)
+    const cities = ['pune', 'nashik', 'panvel', 'mumbai', 'navi mumbai'];
     for (const city of cities) {
       if (queryLower.includes(city) && textToSearch.includes(city)) {
         score += 8;
       }
     }
 
-    // Specific localities (Baner, Sus, Worli, BKC, Assagao, Candolim, Koregaon Park)
-    const localities = ['baner', 'sus', 'balewadi', 'worli', 'bkc', 'assagao', 'candolim', 'koregaon', 'golf course'];
+    // Specific localities (Baner, Sus, Balewadi, Gangapur Road, New Panvel, Atal Setu)
+    const localities = ['baner', 'sus', 'balewadi', 'gangapur', 'new panvel', 'panvel', 'atal setu', 'hinjawadi'];
     for (const loc of localities) {
       if (queryLower.includes(loc) && textToSearch.includes(loc)) {
         score += 10;
@@ -281,16 +281,16 @@ Prime Localities: ${loc.popularLocalities.join(', ')}`,
     suggestedFollowUps.push(`What is the MahaRERA number for ${finalMatchedProps[0].title.slice(0, 25)}?`);
   }
   if (queryLower.includes('pune') || queryLower.includes('baner') || queryLower.includes('sus')) {
-    suggestedFollowUps.push('Show all properties in Baner-Sus Pune');
+    suggestedFollowUps.push('Show all properties in Baner-Sus & Balewadi, Pune');
     suggestedFollowUps.push('Connect with Partner Rakesh Desale Patil');
-  } else if (queryLower.includes('worli') || queryLower.includes('mumbai')) {
-    suggestedFollowUps.push('Tell me about Aura Sky Mumbai starting ₹ 85 Lakh');
-    suggestedFollowUps.push('What sea-facing penthouses are available in Worli?');
-  } else if (queryLower.includes('goa')) {
-    suggestedFollowUps.push('Show private villas in Assagao & Candolim');
+  } else if (queryLower.includes('panvel') || queryLower.includes('mumbai')) {
+    suggestedFollowUps.push('Tell me about Aura Sky Panvel starting ₹ 85 Lakh');
+    suggestedFollowUps.push('Show ready-to-move 2 BHK in Panvel, Mumbai');
+  } else if (queryLower.includes('nashik') || queryLower.includes('gangapur')) {
+    suggestedFollowUps.push('Show Aura Greens 3 BHK on Gangapur Road, Nashik');
   } else {
+    suggestedFollowUps.push('Show properties in Pune, Nashik & Panvel');
     suggestedFollowUps.push('How does Signature Aura verify 30-year property titles?');
-    suggestedFollowUps.push('Show commercial Grade-A office spaces');
   }
 
   return {

@@ -20,13 +20,13 @@ export default function LocationsPage() {
         {/* Header */}
         <div className="max-w-3xl mb-14">
           <span className="text-xs font-semibold tracking-widest text-[#B99A63] uppercase block mb-2">
-            Prime Markets
+            3 Core Markets
           </span>
           <h1 className="font-serif text-3xl sm:text-5xl text-[#171717] leading-tight">
-            India’s Premier Real Estate Corridors
+            Pune, Nashik & Panvel (Mumbai)
           </h1>
           <p className="mt-4 text-sm sm:text-base text-stone-600 font-light leading-relaxed">
-            From the financial capital of Mumbai to the stately golf corridors of Delhi NCR, tropical sanctuaries of Goa, and tech capitals of Bengaluru and Hyderabad.
+            Explore our verified MahaRERA residential corridors across West Pune (Baner-Sus & Balewadi), serene Gangapur Road in Nashik, and the high-growth New Panvel Airport & Atal Setu corridor in Mumbai.
           </p>
         </div>
 

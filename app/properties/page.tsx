@@ -132,7 +132,11 @@ function PropertiesContent() {
 
     // City
     if (filters.city !== 'All Cities' && filters.city !== '') {
-      result = result.filter(p => p.location.city.toLowerCase() === filters.city.toLowerCase());
+      const targetCity = filters.city.toLowerCase();
+      result = result.filter(p => {
+        const propCity = p.location.city.toLowerCase();
+        return propCity === targetCity || propCity.includes(targetCity) || targetCity.includes(propCity);
+      });
     }
 
     // Property Type

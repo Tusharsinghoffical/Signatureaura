@@ -41,7 +41,7 @@ export const CHAT_CONFIG = {
     "Custom AI Chatbots & RAG Assistants (WhatsApp bots, vector search, customer support)",
     "Full-Stack Web Development (Next.js, React, Tailwind, PostgreSQL)",
     "SaaS MVP Development (Rapid 2-week MVP sprints, payment integration)",
-    "Luxury Real Estate & Land Aggregation (Worli Penthouses, Baner-Sus Acres, Builder JVs)"
+    "Real Estate Development & Advisory (Pune, Nashik & Panvel, Mumbai)"
   ],
   PRICING_SUMMARY: "Custom automations starting from $300; Full MVPs from $1,200; Free 30-min strategy audit.",
   TURNAROUND_TIME: "Working prototype in 48-72 hours; Full MVP in 10-14 days.",
@@ -293,20 +293,20 @@ We build high-performance, SEO-optimized web applications with modern architectu
       };
     }
 
-    // 7. Luxury Real Estate / Land / Plots / Baner-Sus / Worli
-    if (q.includes('real estate') || q.includes('property') || q.includes('penthouse') || q.includes('worli') || q.includes('pune') || q.includes('baner') || q.includes('plot') || q.includes('acre') || q.includes('rera')) {
+    // 7. Real Estate / Pune / Nashik / Panvel
+    if (q.includes('real estate') || q.includes('property') || q.includes('panvel') || q.includes('nashik') || q.includes('pune') || q.includes('baner') || q.includes('plot') || q.includes('acre') || q.includes('rera')) {
       return {
         reply: `### Signature Aura™ Verified Real Estate Portfolio
 
 Headquartered at **Office No. 812, Millennium Towers, Baner-Sus, Pune**:
 
-• **Worli Sea Face Penthouses (Mumbai):** 5 BHK Triplex Sky-Residences (5,500 sq.ft.) with Arabian Sea vistas.
-• **Land & Plots (Pune Prime Corridors):** Over **250+ acres** aggregated across Baner-Sus, Hinjawadi & Balewadi for builder Joint Ventures (JV) and clear-title NA plots.
-• **Goa Luxury Villas:** Heritage Portuguese pool villas in Assagao and Candolim.
+• **Pune (Baner-Sus & Sus-Balewadi):** MahaRERA-verified 2 BHK & 3 BHK homes starting ₹ 45 Lakh – ₹ 68 Lakh.
+• **Panvel, Mumbai (New Panvel & Expressway Corridor):** High-rise & OC-ready 2 BHK residences from ₹ 58 Lakh – ₹ 85 Lakh near Navi Mumbai International Airport & Atal Setu.
+• **Nashik (Gangapur Road):** Spacious ready-to-move 3 BHK homes at ₹ 52 Lakh with zero GST.
 • **30-Year Forensic Title Due Diligence:** High-court advocate audited title search certificates prior to client earnest deposits.`,
         followUps: [
           "What properties are in Baner-Sus Pune?",
-          "Show available penthouses in Worli",
+          "Show available homes in Panvel, Mumbai",
           "Talk to Founder on WhatsApp"
         ],
         actionType: 'whatsapp'
@@ -323,7 +323,7 @@ Namaste & hello! I am your 24/7 AI Assistant, ready to help you explore:
 • **Custom AI Agents & Workflow Automations** (Save 20+ hours/week)
 • **Custom RAG Chatbots & WhatsApp CRM Bots** (24/7 lead conversion)
 • **Rapid SaaS MVP Delivery** (Production live in 10-14 days)
-• **Luxury Real Estate & Land Acquisitions** (Pune, Mumbai, Goa)
+• **Verified Residential Properties** (Pune, Nashik & Panvel, Mumbai)
 
 What would you like to build or explore today?`,
         followUps: [
@@ -579,10 +579,10 @@ Our engineering and advisory desk led by **${CHAT_CONFIG.FOUNDER_NAME}** can pro
             </button>
             <button
               type="button"
-              onClick={() => handleSend("Show sea-facing penthouses in Worli")}
+              onClick={() => handleSend("Show properties in Panvel Mumbai and Nashik")}
               className="text-[11px] bg-stone-800/80 hover:bg-stone-700 text-stone-300 hover:text-white border border-stone-700 px-2.5 py-1 rounded-full whitespace-nowrap transition-all shrink-0"
             >
-              🚀 Worli Penthouses
+              Panvel & Nashik Homes
             </button>
             <button
               type="button"

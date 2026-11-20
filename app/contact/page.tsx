@@ -294,7 +294,7 @@ function ContactFormContent() {
                   </label>
                   <input
                     type="text"
-                    placeholder="e.g. Worli Sea Face, Assagao, Golf Course Rd..."
+                    placeholder="e.g. Baner-Sus Pune, Gangapur Road Nashik, New Panvel..."
                     value={formData.preferredLocation}
                     onChange={(e) => setFormData({ ...formData, preferredLocation: e.target.value })}
                     suppressHydrationWarning

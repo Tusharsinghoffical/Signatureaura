@@ -89,25 +89,24 @@ const INITIAL_MESSAGES: Message[] = [
     id: 'welcome-1',
     role: 'assistant',
     content:
-      'Namaste. Welcome to **Signature Aura Concierge**. Ask about **Signature Aura Baner** (2 BHK starting ₹ 45 Lakh), **Aura Sky Mumbai** (starting ₹ 85 Lakh), or any property in our curated **₹ 40 Lakh – ₹ 90 Lakh** portfolio.',
+      'Namaste. Welcome to **Signature Aura Concierge**. Explore our MahaRERA-verified homes across **Pune** (Baner-Sus & Balewadi), **Nashik** (Gangapur Road), and **Panvel, Mumbai** (New Panvel) priced between **₹ 45 Lakh – ₹ 85 Lakh**.',
     timestamp: 'Just now',
     suggestedFollowUps: [
       'Signature Aura Baner 2 BHK ₹ 45 Lakh',
-      'Aura Sky Mumbai starting ₹ 85 Lakh',
-      'Show penthouses in Worli Mumbai',
+      'Aura Sky Panvel Mumbai ₹ 85 Lakh',
+      'Show 3 BHK in Gangapur Road Nashik',
       '30-year property title audit',
     ],
   },
 ];
 
 const QUICK_TOPICS = [
-  { label: 'Baner 2 BHK', query: 'Tell me about Signature Aura 2 BHK in Baner Pune starting 45 lakh' },
-  { label: 'Aura Sky Mumbai', query: 'Tell me about Aura Sky Mumbai starting 85 lakh' },
-  { label: 'Worli Penthouses', query: 'Show sea-facing penthouses in Worli Mumbai' },
-  { label: 'Goa Villas', query: 'Show luxury villas in Goa Assagao' },
-  { label: 'Commercial', query: 'Show commercial office spaces' },
+  { label: 'Pune (Baner)', query: 'Tell me about Signature Aura 2 BHK and 3 BHK properties in Pune' },
+  { label: 'Panvel, Mumbai', query: 'Show properties in Panvel Mumbai including Aura Sky and Aura Courtyard' },
+  { label: 'Nashik Homes', query: 'Show 3 BHK property on Gangapur Road Nashik' },
+  { label: 'Ready to Move', query: 'Which ready to move zero GST properties are available?' },
   { label: 'Title Audit', query: 'How does Signature Aura perform forensic 30-year title due diligence?' },
-  { label: 'NRI Desk', query: 'What are the RBI and FEMA guidelines for NRIs buying luxury property?' },
+  { label: 'NRI Desk', query: 'What are the RBI and FEMA guidelines for NRIs buying property in Maharashtra?' },
   { label: 'Partners', query: 'Who are the Partners at Signature Aura?' },
 ];
 
@@ -987,7 +986,7 @@ export default function PropertyAssistantModal({
           <div className="flex-1 flex flex-col overflow-hidden bg-[#FAF9F5]">
             {/* City Filter Bar */}
             <div className="px-3 py-2 bg-white border-b border-[#EAE5DA] flex items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
-              {['All', 'Pune', 'Mumbai', 'Delhi NCR', 'Goa', 'Commercial'].map((city) => (
+              {['All', 'Pune', 'Nashik', 'Panvel, Mumbai'].map((city) => (
                 <button
                   key={city}
                   type="button"

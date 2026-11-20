@@ -168,13 +168,13 @@ export default function AdminPage() {
     isFeatured: true,
     isPublished: true,
     isReraApproved: true,
-    reraNumber: 'P51900088921',
+    reraNumber: 'P52100049218',
     location: {
-      city: 'Mumbai',
-      locality: 'Worli',
-      address: 'Skyline Residence, Worli, Mumbai',
-      lat: 19.0144,
-      lng: 72.8156
+      city: 'Pune',
+      locality: 'Baner-Sus',
+      address: 'Near Nanaware Bridge, Baner-Sus, Pune',
+      lat: 18.5590,
+      lng: 73.7868
     },
     amenitiesText: 'Swimming Pool, Gym, Concierge, Italian Marble, Sea View',
     imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
@@ -936,13 +936,13 @@ export default function AdminPage() {
                     isFeatured: true,
                     isPublished: true,
                     isReraApproved: true,
-                    reraNumber: 'P51900099412',
+                    reraNumber: 'P52100051409',
                     location: {
-                      city: 'Mumbai',
-                      locality: 'Worli',
-                      address: 'Worli Sea Face, Mumbai',
-                      lat: 19.0144,
-                      lng: 72.8156
+                      city: 'Pune',
+                      locality: 'Baner-Sus',
+                      address: 'Baner-Sus Road, Pune',
+                      lat: 18.5590,
+                      lng: 73.7868
                     },
                     amenitiesText: 'Sea View, Heated Pool, Concierge, Marble Flooring',
                     imageUrl: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80',
@@ -2121,8 +2121,7 @@ export default function AdminPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-stone-700 mb-1">City</label>
-                  <input
-                    type="text"
+                  <select
                     required
                     value={propertyFormData.location.city}
                     onChange={(e) => setPropertyFormData({
@@ -2130,7 +2129,11 @@ export default function AdminPage() {
                       location: { ...propertyFormData.location, city: e.target.value }
                     })}
                     className="w-full bg-white border border-[#E8E5DF] px-3 py-2 rounded text-xs"
-                  />
+                  >
+                    <option value="Pune">Pune</option>
+                    <option value="Nashik">Nashik</option>
+                    <option value="Panvel, Mumbai">Panvel, Mumbai</option>
+                  </select>
                 </div>
 
                 <div>

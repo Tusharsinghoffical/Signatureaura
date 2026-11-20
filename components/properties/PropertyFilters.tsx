@@ -72,8 +72,8 @@ export default function PropertyFilters({
 }: PropertyFiltersProps) {
   const [isExpandedFiltersOpen, setIsExpandedFiltersOpen] = useState(false);
 
-  const cities = ['All Cities', 'Mumbai', 'Delhi NCR', 'Goa', 'Bengaluru', 'Hyderabad', 'Pune'];
-  const propertyTypes = ['All Types', 'Apartment', 'Penthouse', 'Villa', 'Independent Floor', 'Grade-A Office', 'Retail Showroom'];
+  const cities = ['All Cities', 'Pune', 'Nashik', 'Panvel, Mumbai'];
+  const propertyTypes = ['All Types', 'Apartment', 'Penthouse', 'Villa', 'Independent Floor'];
   
   const bedroomOptions: { label: string; value: number | 'all' }[] = [
     { label: 'Any BHK', value: 'all' },
@@ -128,7 +128,7 @@ export default function PropertyFilters({
             value={filters.searchQuery}
             onChange={(e) => onChange({ searchQuery: e.target.value })}
             suppressHydrationWarning
-            placeholder="Search by locality (Worli, Assagao, Baner-Sus, BKC), property name, or keywords..."
+            placeholder="Search by locality (Baner-Sus, Gangapur Road, New Panvel), property name, or keywords..."
             className="w-full pl-10 pr-9 py-2.5 bg-[#FAF9F5] border border-[#E8E5DF] focus:border-[#171717] focus:outline-none rounded-xl text-sm text-[#171717] placeholder:text-stone-400 min-h-[44px]"
           />
           {filters.searchQuery && (

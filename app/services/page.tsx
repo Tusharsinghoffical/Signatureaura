@@ -38,14 +38,14 @@ export default function ServicesPage() {
     {
       title: 'Executive Leases & Corporate Relocations',
       tagline: 'Turn-key luxury residences for founders, CEOs, and expatriates',
-      desc: 'Seamless tenancy representation for corporate leadership stationed in Mumbai, Delhi NCR, and Bengaluru. Flexible 12 to 36-month lease structuring with concierge maintenance support.',
+      desc: 'Seamless tenancy representation for corporate leadership stationed in Pune, Nashik, and Panvel (Mumbai). Flexible 12 to 36-month lease structuring with concierge maintenance support.',
       icon: Sparkles,
       enquirySubject: 'Executive Rental & Leasing'
     },
     {
       title: 'Commercial Real Estate & Grade-A Offices',
-      tagline: 'Institutional office floor plates and flagship retail flagships',
-      desc: 'Advisory for corporate headquarters in BKC Mumbai, Cyber City Gurgaon, and Outer Ring Road Bengaluru. Comprehensive financial modeling, floor efficiency auditing, and lease negotiation.',
+      tagline: 'Institutional office floor plates and flagship retail addresses',
+      desc: 'Advisory for business offices and retail spaces across Baner-Balewadi (Pune), New Panvel (Mumbai), and Gangapur Road (Nashik). Comprehensive financial modeling, floor efficiency auditing, and lease negotiation.',
       icon: Building2,
       enquirySubject: 'Commercial Real Estate Advisory'
     },
@@ -73,7 +73,7 @@ export default function ServicesPage() {
     {
       title: 'Comprehensive Asset & Property Management',
       tagline: 'End-to-end stewardship for absentee owners and holiday homes',
-      desc: 'Routine property inspections, preventative architectural maintenance, utility bill management, society representation, and vetted tenant vetting for high-end second homes in Goa and Mumbai.',
+      desc: 'Routine property inspections, preventative architectural maintenance, utility bill management, society representation, and tenant vetting for residential investments in Pune, Nashik, and Panvel (Mumbai).',
       icon: FileCheck,
       enquirySubject: 'Property Management'
     }

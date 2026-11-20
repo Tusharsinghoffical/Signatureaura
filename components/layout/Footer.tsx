@@ -117,37 +117,22 @@ export default function Footer() {
           {/* Prime Markets (2.5 Cols) */}
           <div className="lg:col-span-2 space-y-3.5">
             <h4 className="text-xs font-semibold tracking-widest text-[#B99A63] uppercase font-mono">
-              Prime Markets
+              Our 3 Locations
             </h4>
             <ul className="space-y-2.5 text-xs sm:text-sm text-stone-300">
               <li>
-                <Link href="/locations/mumbai" className="hover:text-[#E8D39E] transition-colors">
-                  Mumbai (Worli & BKC)
-                </Link>
-              </li>
-              <li>
-                <Link href="/locations/delhi-ncr" className="hover:text-[#E8D39E] transition-colors">
-                  Delhi NCR (Camellias)
-                </Link>
-              </li>
-              <li>
-                <Link href="/locations/goa" className="hover:text-[#E8D39E] transition-colors">
-                  North Goa (Assagao)
-                </Link>
-              </li>
-              <li>
                 <Link href="/locations/pune" className="hover:text-[#E8D39E] transition-colors">
-                  Pune (Baner & Koregaon Pk)
+                  Pune (Baner-Sus & Balewadi)
                 </Link>
               </li>
               <li>
-                <Link href="/locations/bengaluru" className="hover:text-[#E8D39E] transition-colors">
-                  Bengaluru (CBD & Indiranagar)
+                <Link href="/locations/nashik" className="hover:text-[#E8D39E] transition-colors">
+                  Nashik (Gangapur Road)
                 </Link>
               </li>
               <li>
-                <Link href="/locations/hyderabad" className="hover:text-[#E8D39E] transition-colors">
-                  Hyderabad (Jubilee Hills)
+                <Link href="/locations/panvel-mumbai" className="hover:text-[#E8D39E] transition-colors">
+                  Panvel, Mumbai (New Panvel)
                 </Link>
               </li>
             </ul>

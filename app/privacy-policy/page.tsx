@@ -55,7 +55,7 @@ export default function PrivacyPolicyPage() {
           <section className="space-y-3">
             <h2 className="font-serif text-xl text-[#171717] font-medium">4. RERA & Statutory Compliance</h2>
             <p>
-              All property transactions and disclosures adhere strictly to the Real Estate (Regulation and Development) Act, 2016 (RERA) and state regulatory bodies (MahaRERA, Haryana RERA, Goa RERA, Karnataka RERA).
+              All property transactions and disclosures adhere strictly to the Real Estate (Regulation and Development) Act, 2016 (RERA) and Maharashtra Real Estate Regulatory Authority (MahaRERA) across Pune, Nashik, and Panvel (Mumbai).
             </p>
           </section>
 
