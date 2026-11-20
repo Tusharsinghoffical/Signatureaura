@@ -25,7 +25,9 @@ import {
   Database,
   X,
   Bell,
-  RefreshCw
+  RefreshCw,
+  Flame,
+  ArrowRight
 } from 'lucide-react';
 import { Property, Lead, SiteVisit, BusinessConfig, LeadStatus } from '@/types/real-estate';
 import { BUSINESS_CONFIG, formatINR } from '@/lib/config';
@@ -66,6 +68,58 @@ function getAdminAuthSnapshot(): boolean {
 
 function getAdminAuthServerSnapshot(): boolean {
   return false;
+}
+
+interface LeadIntentInfo {
+  isHighIntent: boolean;
+  category: 'both' | 'site_visit' | 'pricing' | null;
+  label: string;
+  priorityScore: number;
+}
+
+function getLeadIntentInfo(lead: Lead): LeadIntentInfo {
+  const text = `${lead.message || ''} ${lead.propertyTitle || ''}`.toLowerCase();
+
+  const requestedSiteVisit =
+    lead.leadSource === 'site_visit_booking' ||
+    Boolean(lead.preferredVisitDate) ||
+    lead.leadStatus === 'Site Visit Scheduled' ||
+    /\b(site\s*visit|visit|viewing|tour|inspection|walkthrough|chauffeur)\b/i.test(text);
+
+  const requestedPricing =
+    Boolean(lead.budget && lead.budget.trim().length > 0) ||
+    /\b(pric(e|ing)|cost\s*sheet|payment\s*plan|quote|quotation|rate|floor\s*plan|brochure|lakh|crore|cr\b|emi|discount|offer|budget)\b/i.test(text);
+
+  if (requestedSiteVisit && requestedPricing) {
+    return {
+      isHighIntent: true,
+      category: 'both',
+      label: 'Site Visit & Pricing',
+      priorityScore: 3,
+    };
+  }
+  if (requestedSiteVisit) {
+    return {
+      isHighIntent: true,
+      category: 'site_visit',
+      label: 'Site Visit Request',
+      priorityScore: 2,
+    };
+  }
+  if (requestedPricing) {
+    return {
+      isHighIntent: true,
+      category: 'pricing',
+      label: 'Pricing Details',
+      priorityScore: 1,
+    };
+  }
+  return {
+    isHighIntent: false,
+    category: null,
+    label: '',
+    priorityScore: 0,
+  };
 }
 
 export default function AdminPage() {
@@ -130,10 +184,13 @@ export default function AdminPage() {
   // Lead search & filter
   const [leadSearch, setLeadSearch] = useState('');
   const [leadStatusFilter, setLeadStatusFilter] = useState<string>('all');
+  const [highIntentOnly, setHighIntentOnly] = useState(false);
 
   // Realtime SSE connection & live arrival notification state
   const [realtimeState, setRealtimeState] = useState<'live' | 'connecting' | 'reconnecting'>('connecting');
   const [liveNotice, setLiveNotice] = useState<LiveArrivalNotice | null>(null);
+  const [visitToasts, setVisitToasts] = useState<LiveArrivalNotice[]>([]);
+  const [highlightedVisitId, setHighlightedVisitId] = useState<string | null>(null);
   const [isSyncing, setIsSyncing] = useState(false);
 
   // Load and subscribe to local storage + server-sent realtime inquiry stream
@@ -153,7 +210,11 @@ export default function AdminPage() {
       onDataChange: reload,
       onConnectionChange: (state) => setRealtimeState(state),
       onNewArrival: (notice) => {
-        setLiveNotice(notice);
+        if (notice.kind === 'visit') {
+          setVisitToasts((prev) => [notice, ...prev.filter((t) => t.id !== notice.id)].slice(0, 3));
+        } else if (!notice.id.startsWith('lead-for-visit-')) {
+          setLiveNotice(notice);
+        }
       },
     });
 
@@ -168,6 +229,45 @@ export default function AdminPage() {
     const timer = setTimeout(() => setLiveNotice(null), 9000);
     return () => clearTimeout(timer);
   }, [liveNotice]);
+
+  // Auto-dismiss real-time site visit toasts after 14 seconds
+  useEffect(() => {
+    if (visitToasts.length === 0) return;
+    const timer = setTimeout(() => {
+      setVisitToasts((prev) => prev.slice(0, -1));
+    }, 14000);
+    return () => clearTimeout(timer);
+  }, [visitToasts]);
+
+  // Smoothly scroll to & highlight a specific site visit when jumped to from a real-time toast
+  useEffect(() => {
+    if (activeTab !== 'visits' || !highlightedVisitId) return;
+    const scrollTimer = setTimeout(() => {
+      const candidates = document.querySelectorAll(`[data-visit-id="${CSS.escape(highlightedVisitId)}"]`);
+      for (const el of Array.from(candidates)) {
+        const htmlEl = el as HTMLElement;
+        if (htmlEl.offsetParent !== null) {
+          htmlEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          break;
+        }
+      }
+    }, 120);
+
+    const clearHighlightTimer = setTimeout(() => {
+      setHighlightedVisitId((current) => (current === highlightedVisitId ? null : current));
+    }, 6500);
+
+    return () => {
+      clearTimeout(scrollTimer);
+      clearTimeout(clearHighlightTimer);
+    };
+  }, [activeTab, highlightedVisitId, visits]);
+
+  const handleJumpToSiteVisit = (visitId: string) => {
+    setActiveTab('visits');
+    setHighlightedVisitId(visitId);
+    setVisitToasts((prev) => prev.filter((t) => t.id !== visitId));
+  };
 
   const isRealtimeConnected = realtimeState === 'live';
   const [isResettingDb, setIsResettingDb] = useState(false);
@@ -428,20 +528,32 @@ export default function AdminPage() {
     );
   }
 
-  // Filtered leads
-  const filteredLeads = leads.filter(l => {
-    if (leadStatusFilter !== 'all' && l.leadStatus !== leadStatusFilter) return false;
-    if (leadSearch.trim()) {
-      const q = leadSearch.toLowerCase();
-      return (
-        l.fullName.toLowerCase().includes(q) ||
-        l.phone.includes(q) ||
-        l.email.toLowerCase().includes(q) ||
-        (l.propertyTitle && l.propertyTitle.toLowerCase().includes(q))
-      );
-    }
-    return true;
-  });
+  // High-intent lead metrics & filtered/prioritized leads list
+  const highIntentLeadCount = leads.filter((l) => getLeadIntentInfo(l).isHighIntent).length;
+
+  const filteredLeads = leads
+    .filter((l) => {
+      if (highIntentOnly && !getLeadIntentInfo(l).isHighIntent) return false;
+      if (leadStatusFilter !== 'all' && l.leadStatus !== leadStatusFilter) return false;
+      if (leadSearch.trim()) {
+        const q = leadSearch.toLowerCase();
+        return (
+          l.fullName.toLowerCase().includes(q) ||
+          l.phone.includes(q) ||
+          l.email.toLowerCase().includes(q) ||
+          (l.propertyTitle && l.propertyTitle.toLowerCase().includes(q)) ||
+          (l.message && l.message.toLowerCase().includes(q))
+        );
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      if (highIntentOnly) {
+        const scoreDiff = getLeadIntentInfo(b).priorityScore - getLeadIntentInfo(a).priorityScore;
+        if (scoreDiff !== 0) return scoreDiff;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
 
   return (
     <div className="min-h-screen bg-[#F5F3EF] text-[#171717] font-sans flex flex-col overflow-x-hidden">
@@ -1129,34 +1241,80 @@ export default function AdminPage() {
             </div>
 
             {/* Filter and Search Bar */}
-            <div className="bg-white border border-[#E8E5DF] rounded-xl p-3.5 sm:p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
-              <div className="relative w-full sm:w-72">
-                <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  placeholder="Search lead by name, phone, email..."
-                  value={leadSearch}
-                  onChange={(e) => setLeadSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg text-base sm:text-xs focus:outline-none"
-                />
+            <div className="bg-white border border-[#E8E5DF] rounded-xl p-3.5 sm:p-4 space-y-3">
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 sm:gap-4">
+                <div className="relative w-full lg:w-80">
+                  <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    placeholder="Search lead by name, phone, email..."
+                    value={leadSearch}
+                    onChange={(e) => setLeadSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg text-base sm:text-xs focus:outline-none"
+                  />
+                </div>
+
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setHighIntentOnly((prev) => !prev)}
+                    aria-pressed={highIntentOnly}
+                    className={`inline-flex items-center justify-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all border cursor-pointer min-h-[38px] whitespace-nowrap ${
+                      highIntentOnly
+                        ? 'bg-[#171717] text-[#E8D39E] border-[#B99A63] shadow-xs'
+                        : 'bg-[#FAF9F5] text-stone-700 border-[#E8E5DF] hover:border-[#B99A63] hover:text-[#171717]'
+                    }`}
+                  >
+                    <Flame className={`w-3.5 h-3.5 ${highIntentOnly ? 'text-[#E8D39E]' : 'text-[#B99A63]'}`} />
+                    <span>High Intent</span>
+                    <span
+                      className={`text-[10px] font-mono px-1.5 py-0.5 rounded tabular-nums ${
+                        highIntentOnly
+                          ? 'bg-[#B99A63] text-[#171717]'
+                          : 'bg-[#E8E5DF] text-stone-700'
+                      }`}
+                    >
+                      {highIntentLeadCount}
+                    </span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-stone-500 shrink-0">Status:</span>
+                    <select
+                      value={leadStatusFilter}
+                      onChange={(e) => setLeadStatusFilter(e.target.value)}
+                      className="w-full sm:w-auto bg-[#FAF9F5] border border-[#E8E5DF] px-3 py-2 rounded-lg text-base sm:text-xs text-[#171717] focus:outline-none"
+                    >
+                      <option value="all">All Statuses ({leads.length})</option>
+                      <option value="New">New</option>
+                      <option value="Contacted">Contacted</option>
+                      <option value="Qualified">Qualified</option>
+                      <option value="Site Visit Scheduled">Site Visit Scheduled</option>
+                      <option value="Converted">Converted</option>
+                      <option value="Lost">Lost</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto">
-                <span className="text-xs text-stone-500 shrink-0">Status:</span>
-                <select
-                  value={leadStatusFilter}
-                  onChange={(e) => setLeadStatusFilter(e.target.value)}
-                  className="w-full sm:w-auto bg-[#FAF9F5] border border-[#E8E5DF] px-3 py-2 rounded-lg text-base sm:text-xs text-[#171717] focus:outline-none"
-                >
-                  <option value="all">All Statuses ({leads.length})</option>
-                  <option value="New">New</option>
-                  <option value="Contacted">Contacted</option>
-                  <option value="Qualified">Qualified</option>
-                  <option value="Site Visit Scheduled">Site Visit Scheduled</option>
-                  <option value="Converted">Converted</option>
-                  <option value="Lost">Lost</option>
-                </select>
-              </div>
+              {highIntentOnly && (
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2.5 border-t border-[#EFECE4] text-xs">
+                  <div className="flex items-center gap-2 text-stone-700">
+                    <Flame className="w-3.5 h-3.5 text-[#B99A63] shrink-0" />
+                    <span>
+                      Prioritizing <strong className="text-[#171717]">Site Visit</strong> &amp;{' '}
+                      <strong className="text-[#171717]">Pricing Details</strong> leads for immediate follow-up.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setHighIntentOnly(false)}
+                    className="text-[#845E1B] hover:text-[#171717] font-medium underline underline-offset-2 cursor-pointer"
+                  >
+                    Show all leads
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Leads Table & Mobile/Tablet Cards */}
@@ -1165,11 +1323,17 @@ export default function AdminPage() {
                 <div className="py-14 px-6 text-center space-y-2">
                   <Users className="w-9 h-9 text-stone-300 mx-auto" />
                   <h3 className="font-serif text-lg text-[#171717]">
-                    {leads.length === 0 ? 'Waiting for Genuine Client Leads' : 'No Matching Leads Found'}
+                    {leads.length === 0
+                      ? 'Waiting for Genuine Client Leads'
+                      : highIntentOnly
+                      ? 'No High Intent Leads Match Yet'
+                      : 'No Matching Leads Found'}
                   </h3>
                   <p className="text-xs text-stone-500 max-w-md mx-auto">
                     {leads.length === 0
                       ? 'Dummy/demo leads have been removed. Every real inquiry from your Contact page, Property enquiry forms, Callback modal, or Concierge streams here automatically in real time.'
+                      : highIntentOnly
+                      ? 'Leads requesting a Site Visit or Pricing Details will automatically appear and sort to the top here.'
                       : 'Try clearing your search or status filter to view all genuine leads.'}
                   </p>
                 </div>
@@ -1177,11 +1341,21 @@ export default function AdminPage() {
                 <>
                   {/* Mobile & Tablet Card Grid (< lg) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
-                    {filteredLeads.map((lead) => (
+                    {filteredLeads.map((lead) => {
+                      const intent = getLeadIntentInfo(lead);
+                      return (
                       <div key={lead.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
-                            <div className="font-semibold text-stone-900 text-sm break-words">{lead.fullName}</div>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <span className="font-semibold text-stone-900 text-sm break-words">{lead.fullName}</span>
+                              {intent.isHighIntent && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-[#B99A63]/40 text-[#845E1B] text-[10px] font-semibold">
+                                  <Flame className="w-2.5 h-2.5 text-[#B99A63]" />
+                                  {intent.label}
+                                </span>
+                              )}
+                            </div>
                             <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
                               <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{lead.phone}</a>
                               <span className="mx-1">·</span>
@@ -1253,7 +1427,8 @@ export default function AdminPage() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Laptop & Desktop Table (lg+) */}
@@ -1270,10 +1445,20 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#E8E5DF]">
-                        {filteredLeads.map((lead) => (
+                        {filteredLeads.map((lead) => {
+                          const intent = getLeadIntentInfo(lead);
+                          return (
                           <tr key={lead.id} className="hover:bg-stone-50 transition-colors">
                             <td className="py-3.5 px-4">
-                              <div className="font-semibold text-stone-900">{lead.fullName}</div>
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                <span className="font-semibold text-stone-900">{lead.fullName}</span>
+                                {intent.isHighIntent && (
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 border border-[#B99A63]/40 text-[#845E1B] text-[10px] font-semibold">
+                                    <Flame className="w-2.5 h-2.5 text-[#B99A63]" />
+                                    {intent.label}
+                                  </span>
+                                )}
+                              </div>
                               <div className="text-[11px] text-stone-500 mt-0.5">
                                 <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63]">{lead.phone}</a> · {lead.email}
                               </div>
@@ -1342,7 +1527,8 @@ export default function AdminPage() {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1389,8 +1575,24 @@ export default function AdminPage() {
                 <>
                   {/* Mobile & Tablet Card Grid (< lg) */}
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
-                    {visits.map((v) => (
-                      <div key={v.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
+                    {visits.map((v) => {
+                      const isHighlighted = highlightedVisitId === v.id;
+                      return (
+                      <div
+                        key={v.id}
+                        data-visit-id={v.id}
+                        className={`p-4 space-y-2.5 md:rounded-xl min-w-0 transition-all duration-500 ${
+                          isHighlighted
+                            ? 'bg-amber-50/80 ring-2 ring-[#B99A63] border border-[#B99A63] shadow-md'
+                            : 'bg-white md:border md:border-[#E8E5DF]'
+                        }`}
+                      >
+                        {isHighlighted && (
+                          <div className="inline-flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-[#845E1B] bg-[#B99A63]/20 px-2 py-0.5 rounded">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Just Booked · Live</span>
+                          </div>
+                        )}
                         <div className="flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="font-semibold text-stone-900 text-sm break-words">{v.fullName}</div>
@@ -1461,7 +1663,8 @@ export default function AdminPage() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                      );
+                    })}
                   </div>
 
                   {/* Laptop & Desktop Table (lg+) */}
@@ -1478,10 +1681,28 @@ export default function AdminPage() {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#E8E5DF]">
-                        {visits.map((v) => (
-                          <tr key={v.id} className="hover:bg-stone-50 transition-colors">
+                        {visits.map((v) => {
+                          const isHighlighted = highlightedVisitId === v.id;
+                          return (
+                          <tr
+                            key={v.id}
+                            data-visit-id={v.id}
+                            className={`transition-all duration-500 ${
+                              isHighlighted
+                                ? 'bg-amber-50/90 ring-2 ring-inset ring-[#B99A63]'
+                                : 'hover:bg-stone-50'
+                            }`}
+                          >
                             <td className="py-3.5 px-4">
-                              <span className="font-semibold text-stone-900 block">{v.fullName}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-stone-900">{v.fullName}</span>
+                                {isHighlighted && (
+                                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-[#845E1B] bg-[#B99A63]/20 px-1.5 py-0.5 rounded">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                    New
+                                  </span>
+                                )}
+                              </div>
                               <span className="text-[11px] text-stone-500">{v.phone} · {v.email}</span>
                               {v.notes && <p className="text-[11px] text-stone-400 italic mt-0.5">&ldquo;{v.notes}&rdquo;</p>}
                             </td>
@@ -1539,7 +1760,8 @@ export default function AdminPage() {
                               </div>
                             </td>
                           </tr>
-                        ))}
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -1973,6 +2195,83 @@ export default function AdminPage() {
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          REAL-TIME CLICKABLE SITE VISIT TOAST NOTIFICATIONS
+         ===================================================================== */}
+      {visitToasts.length > 0 && (
+        <div
+          aria-live="polite"
+          aria-label="Real-time site visit notifications"
+          className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] left-3 right-3 sm:left-auto sm:bottom-6 sm:right-6 z-50 sm:w-[375px] flex flex-col gap-2.5 pointer-events-none"
+        >
+          {visitToasts.map((toast) => (
+            <div
+              key={toast.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleJumpToSiteVisit(toast.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleJumpToSiteVisit(toast.id);
+                }
+              }}
+              className="pointer-events-auto group w-full text-left bg-[#171717] hover:bg-[#1F1F22] text-white border border-[#B99A63] rounded-xl p-3.5 shadow-2xl transition-all cursor-pointer animate-in slide-in-from-bottom-2 fade-in duration-200"
+            >
+              <div className="flex items-start justify-between gap-2.5">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  <div className="w-9 h-9 rounded-lg bg-[#B99A63]/20 border border-[#B99A63]/50 flex items-center justify-center shrink-0 mt-0.5">
+                    <Calendar className="w-4 h-4 text-[#E8D39E]" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-[#E8D39E]">
+                        New Site Visit Booked · Live
+                      </span>
+                    </div>
+                    <p className="text-sm font-semibold text-white truncate mt-0.5">
+                      {toast.fullName}
+                    </p>
+                    <p className="text-xs text-stone-300 truncate">
+                      {toast.propertyTitle || toast.subtitle}
+                    </p>
+                    {toast.visitDate && (
+                      <p className="text-[11px] font-mono text-stone-400 truncate mt-0.5">
+                        {toast.visitDate}
+                        {toast.timeSlot ? ` · ${toast.timeSlot}` : ''}
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setVisitToasts((prev) => prev.filter((t) => t.id !== toast.id));
+                  }}
+                  aria-label="Dismiss site visit toast"
+                  className="p-1 text-stone-400 hover:text-white rounded-md transition-colors shrink-0 cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+                <span className="text-[11px] text-stone-400">
+                  Click to open in Site Visits
+                </span>
+                <span className="inline-flex items-center gap-1 font-semibold text-[#E8D39E] group-hover:translate-x-0.5 transition-transform">
+                  <span>View Visit</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </span>
+              </div>
+            </div>
+          ))}
         </div>
       )}
 

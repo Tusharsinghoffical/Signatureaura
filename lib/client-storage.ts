@@ -533,6 +533,9 @@ export interface LiveArrivalNotice {
   fullName: string;
   subtitle: string;
   timestamp: string;
+  propertyTitle?: string;
+  visitDate?: string;
+  timeSlot?: string;
 }
 
 export function subscribeToRealtimeInquiries(handlers: {
@@ -549,16 +552,10 @@ export function subscribeToRealtimeInquiries(handlers: {
     [...getStoredLeads().map((l) => l.id), ...getStoredSiteVisits().map((v) => v.id)]
   );
 
-  const notifyIfNew = (
-    kind: 'lead' | 'visit',
-    id: string,
-    fullName: string,
-    subtitle: string,
-    timestamp: string
-  ) => {
-    if (seenArrivals.has(id)) return;
-    seenArrivals.add(id);
-    handlers.onNewArrival?.({ id, kind, fullName, subtitle, timestamp });
+  const notifyIfNew = (notice: LiveArrivalNotice) => {
+    if (seenArrivals.has(notice.id)) return;
+    seenArrivals.add(notice.id);
+    handlers.onNewArrival?.(notice);
   };
 
   // Push any existing genuine local leads/visits to the server hub on initial connect
@@ -599,13 +596,14 @@ export function subscribeToRealtimeInquiries(handlers: {
                 localStorage.setItem(KEYS.LEADS, JSON.stringify(next));
                 recordLastSyncAt();
               }
-              notifyIfNew(
-                'lead',
-                payload.lead.id,
-                payload.lead.fullName,
-                payload.lead.propertyTitle || payload.lead.leadSource.replace(/_/g, ' '),
-                payload.lead.createdAt
-              );
+              notifyIfNew({
+                kind: 'lead',
+                id: payload.lead.id,
+                fullName: payload.lead.fullName,
+                subtitle: payload.lead.propertyTitle || payload.lead.leadSource.replace(/_/g, ' '),
+                timestamp: payload.lead.createdAt,
+                propertyTitle: payload.lead.propertyTitle,
+              });
               handlers.onDataChange();
             }
           } else if (payload.type === 'lead:updated' && payload.lead) {
@@ -632,13 +630,16 @@ export function subscribeToRealtimeInquiries(handlers: {
                 localStorage.setItem(KEYS.SITE_VISITS, JSON.stringify(next));
                 recordLastSyncAt();
               }
-              notifyIfNew(
-                'visit',
-                payload.visit.id,
-                payload.visit.fullName,
-                `${payload.visit.propertyTitle} · ${payload.visit.visitDate}`,
-                payload.visit.createdAt
-              );
+              notifyIfNew({
+                kind: 'visit',
+                id: payload.visit.id,
+                fullName: payload.visit.fullName,
+                subtitle: `${payload.visit.propertyTitle} · ${payload.visit.visitDate}`,
+                timestamp: payload.visit.createdAt,
+                propertyTitle: payload.visit.propertyTitle,
+                visitDate: payload.visit.visitDate,
+                timeSlot: payload.visit.timeSlot,
+              });
               handlers.onDataChange();
             }
           } else if (payload.type === 'visit:updated' && payload.visit) {
@@ -695,24 +696,28 @@ export function subscribeToRealtimeInquiries(handlers: {
       if (detail.key === KEYS.LEADS) {
         const latest = getStoredLeads()[0];
         if (latest) {
-          notifyIfNew(
-            'lead',
-            latest.id,
-            latest.fullName,
-            latest.propertyTitle || latest.leadSource.replace(/_/g, ' '),
-            latest.createdAt
-          );
+          notifyIfNew({
+            kind: 'lead',
+            id: latest.id,
+            fullName: latest.fullName,
+            subtitle: latest.propertyTitle || latest.leadSource.replace(/_/g, ' '),
+            timestamp: latest.createdAt,
+            propertyTitle: latest.propertyTitle,
+          });
         }
       } else if (detail.key === KEYS.SITE_VISITS) {
         const latest = getStoredSiteVisits()[0];
         if (latest) {
-          notifyIfNew(
-            'visit',
-            latest.id,
-            latest.fullName,
-            `${latest.propertyTitle} · ${latest.visitDate}`,
-            latest.createdAt
-          );
+          notifyIfNew({
+            kind: 'visit',
+            id: latest.id,
+            fullName: latest.fullName,
+            subtitle: `${latest.propertyTitle} · ${latest.visitDate}`,
+            timestamp: latest.createdAt,
+            propertyTitle: latest.propertyTitle,
+            visitDate: latest.visitDate,
+            timeSlot: latest.timeSlot,
+          });
         }
       }
     }
