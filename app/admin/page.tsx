@@ -23,7 +23,9 @@ import {
   ExternalLink,
   RotateCcw,
   Database,
-  X
+  X,
+  Bell,
+  RefreshCw
 } from 'lucide-react';
 import { Property, Lead, SiteVisit, BusinessConfig, LeadStatus } from '@/types/real-estate';
 import { BUSINESS_CONFIG, formatINR } from '@/lib/config';
@@ -33,13 +35,18 @@ import {
   deleteStoredProperty,
   getStoredLeads,
   updateStoredLeadStatus,
+  deleteStoredLead,
   getStoredSiteVisits,
   updateStoredSiteVisitStatus,
+  deleteStoredSiteVisit,
   getStoredSettings,
   updateStoredSettings,
   resetAllClientStorage,
   subscribeToClientStorage,
-  exportDataToCSV
+  subscribeToRealtimeInquiries,
+  syncInquiriesWithServer,
+  exportDataToCSV,
+  type LiveArrivalNotice
 } from '@/lib/client-storage';
 
 function subscribeAdminAuth(callback: () => void) {
@@ -124,7 +131,12 @@ export default function AdminPage() {
   const [leadSearch, setLeadSearch] = useState('');
   const [leadStatusFilter, setLeadStatusFilter] = useState<string>('all');
 
-  // Load and subscribe to client-side storage
+  // Realtime SSE connection & live arrival notification state
+  const [realtimeState, setRealtimeState] = useState<'live' | 'connecting' | 'reconnecting'>('connecting');
+  const [liveNotice, setLiveNotice] = useState<LiveArrivalNotice | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  // Load and subscribe to local storage + server-sent realtime inquiry stream
   useEffect(() => {
     if (!isAuthenticated) return;
     const reload = () => {
@@ -135,10 +147,29 @@ export default function AdminPage() {
       setIsLoading(false);
     };
     reload();
-    return subscribeToClientStorage(reload);
+
+    const unsubStorage = subscribeToClientStorage(reload);
+    const unsubRealtime = subscribeToRealtimeInquiries({
+      onDataChange: reload,
+      onConnectionChange: (state) => setRealtimeState(state),
+      onNewArrival: (notice) => {
+        setLiveNotice(notice);
+      },
+    });
+
+    return () => {
+      unsubStorage();
+      unsubRealtime();
+    };
   }, [isAuthenticated]);
 
-  const isRealtimeConnected = true;
+  useEffect(() => {
+    if (!liveNotice) return;
+    const timer = setTimeout(() => setLiveNotice(null), 9000);
+    return () => clearTimeout(timer);
+  }, [liveNotice]);
+
+  const isRealtimeConnected = realtimeState === 'live';
   const [isResettingDb, setIsResettingDb] = useState(false);
 
   // Change Password State
@@ -293,10 +324,36 @@ export default function AdminPage() {
     setLeads(getStoredLeads());
   };
 
+  // Delete Lead
+  const handleDeleteLead = (leadId: string) => {
+    if (!confirm('Remove this lead inquiry permanently?')) return;
+    deleteStoredLead(leadId);
+    setLeads(getStoredLeads());
+  };
+
   // Update Site Visit Status
   const handleUpdateVisitStatus = (visitId: string, newStatus: 'Pending' | 'Confirmed' | 'Completed' | 'Cancelled') => {
     updateStoredSiteVisitStatus(visitId, newStatus);
     setVisits(getStoredSiteVisits());
+  };
+
+  // Delete Site Visit
+  const handleDeleteVisit = (visitId: string) => {
+    if (!confirm('Remove this site visit record permanently?')) return;
+    deleteStoredSiteVisit(visitId);
+    setVisits(getStoredSiteVisits());
+  };
+
+  // Force Sync with Server Hub
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      await syncInquiriesWithServer();
+      setLeads(getStoredLeads());
+      setVisits(getStoredSiteVisits());
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Export Leads as CSV
@@ -416,13 +473,21 @@ export default function AdminPage() {
             <span className="hidden lg:inline text-xs text-stone-400 whitespace-nowrap">
               Advisor & Management Console
             </span>
-            <div className="flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full bg-emerald-950/50 border border-emerald-600/40 text-[11px] text-emerald-400 shrink-0">
-              <span className={`w-1.5 h-1.5 rounded-full ${isRealtimeConnected ? 'bg-emerald-400 animate-pulse' : 'bg-stone-500'}`} />
+            <div className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-0.5 rounded-full text-[11px] shrink-0 border ${
+              isRealtimeConnected
+                ? 'bg-emerald-950/50 border-emerald-600/40 text-emerald-400'
+                : 'bg-amber-950/50 border-amber-600/40 text-amber-300'
+            }`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${isRealtimeConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400 animate-pulse'}`} />
               <span className="font-mono text-[10px] tracking-wider uppercase font-semibold sm:hidden">
-                Live
+                {isRealtimeConnected ? 'Live' : 'Sync'}
               </span>
               <span className="font-mono text-[10px] tracking-wider uppercase font-semibold hidden sm:inline">
-                {isRealtimeConnected ? 'Realtime Live' : 'Connecting...'}
+                {realtimeState === 'live'
+                  ? 'Realtime Live'
+                  : realtimeState === 'reconnecting'
+                  ? 'Reconnecting...'
+                  : 'Connecting...'}
               </span>
             </div>
           </div>
@@ -510,6 +575,47 @@ export default function AdminPage() {
       {/* Main Container */}
       <main className="flex-1 max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 pt-5 pb-20 sm:py-8 w-full min-w-0">
 
+        {/* Live Real-Time Arrival Banner */}
+        {liveNotice && (
+          <div className="mb-5 bg-[#171717] text-white border border-[#B99A63]/60 rounded-xl px-4 py-3 shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-in fade-in">
+            <div className="flex items-start sm:items-center gap-3 min-w-0">
+              <div className="w-8 h-8 rounded-full bg-[#B99A63]/20 border border-[#B99A63]/50 flex items-center justify-center shrink-0">
+                <Bell className="w-4 h-4 text-[#E8D39E]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-semibold text-[#E8D39E]">
+                  {liveNotice.kind === 'visit'
+                    ? 'New Genuine Site Visit Booked'
+                    : 'New Genuine Client Inquiry Received'}
+                </p>
+                <p className="text-xs text-stone-200 truncate">
+                  {liveNotice.fullName} · {liveNotice.subtitle}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveTab(liveNotice.kind === 'visit' ? 'visits' : 'leads');
+                  setLiveNotice(null);
+                }}
+                className="bg-[#B99A63] hover:bg-[#a68853] text-[#171717] text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              >
+                View Now
+              </button>
+              <button
+                type="button"
+                onClick={() => setLiveNotice(null)}
+                aria-label="Dismiss notification"
+                className="p-1.5 text-stone-400 hover:text-white rounded-lg cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* =====================================================================
             TAB 1: OVERVIEW METRICS
            ===================================================================== */}
@@ -586,37 +692,47 @@ export default function AdminPage() {
                 </div>
 
                 <div className="divide-y divide-[#E8E5DF]">
-                  {leads.slice(0, 4).map((lead) => (
-                    <div key={lead.id} className="py-3.5 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-medium text-xs sm:text-sm text-[#171717]">{lead.fullName}</span>
-                          <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded capitalize whitespace-nowrap">
-                            {lead.leadSource.replace(/_/g, ' ')}
+                  {leads.length === 0 ? (
+                    <div className="py-10 text-center space-y-1.5">
+                      <Users className="w-7 h-7 text-stone-300 mx-auto" />
+                      <p className="text-xs font-medium text-stone-700">No genuine client enquiries yet</p>
+                      <p className="text-[11px] text-stone-500 max-w-xs mx-auto">
+                        Real inquiries submitted from Contact, Property pages, Callback modal, or Concierge appear here live.
+                      </p>
+                    </div>
+                  ) : (
+                    leads.slice(0, 4).map((lead) => (
+                      <div key={lead.id} className="py-3.5 flex flex-col sm:flex-row sm:items-start justify-between gap-2.5 sm:gap-4">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="font-medium text-xs sm:text-sm text-[#171717]">{lead.fullName}</span>
+                            <span className="text-[10px] bg-stone-100 text-stone-600 px-1.5 py-0.5 rounded capitalize whitespace-nowrap">
+                              {lead.leadSource.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                          <p className="text-xs text-stone-600 mt-0.5 break-words">
+                            {lead.propertyTitle || 'General Advisory Request'}
+                          </p>
+                          <p className="text-[11px] text-stone-400 mt-1 break-all sm:break-normal">
+                            {lead.phone} · {lead.email}
+                          </p>
+                        </div>
+
+                        <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0 pt-1 sm:pt-0">
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap ${
+                            lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-700' :
+                            lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-700' :
+                            'bg-stone-100 text-stone-700'
+                          }`}>
+                            {lead.leadStatus}
+                          </span>
+                          <span className="text-[10px] text-stone-400 tabular-nums">
+                            {new Date(lead.createdAt).toLocaleDateString('en-IN')}
                           </span>
                         </div>
-                        <p className="text-xs text-stone-600 mt-0.5 break-words">
-                          {lead.propertyTitle || 'General Advisory Request'}
-                        </p>
-                        <p className="text-[11px] text-stone-400 mt-1 break-all sm:break-normal">
-                          {lead.phone} · {lead.email}
-                        </p>
                       </div>
-
-                      <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-2 shrink-0 pt-1 sm:pt-0">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap ${
-                          lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-700' :
-                          lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-700' :
-                          'bg-stone-100 text-stone-700'
-                        }`}>
-                          {lead.leadStatus}
-                        </span>
-                        <span className="text-[10px] text-stone-400 tabular-nums">
-                          {new Date(lead.createdAt).toLocaleDateString('en-IN')}
-                        </span>
-                      </div>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -633,23 +749,33 @@ export default function AdminPage() {
                 </div>
 
                 <div className="space-y-3">
-                  {visits.slice(0, 3).map((v) => (
-                    <div key={v.id} className="p-3.5 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg">
-                      <div className="flex justify-between items-start gap-2">
-                        <span className="font-medium text-xs sm:text-sm text-[#171717] min-w-0 break-words">{v.fullName}</span>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${
-                          v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                        }`}>
-                          {v.status}
-                        </span>
-                      </div>
-                      <p className="text-xs text-stone-600 line-clamp-2 sm:truncate mt-1">{v.propertyTitle}</p>
-                      <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-stone-500">
-                        <span className="break-words">{v.visitDate} ({v.timeSlot})</span>
-                        {v.pickupRequired && <span className="text-[#B99A63] font-medium whitespace-nowrap">VIP Chauffeur</span>}
-                      </div>
+                  {visits.length === 0 ? (
+                    <div className="py-10 text-center space-y-1.5 bg-[#FAF9F5] border border-dashed border-[#E8E5DF] rounded-lg px-4">
+                      <Calendar className="w-7 h-7 text-stone-300 mx-auto" />
+                      <p className="text-xs font-medium text-stone-700">No scheduled site visits yet</p>
+                      <p className="text-[11px] text-stone-500">
+                        Genuine client bookings from property viewings or concierge sync here in real time.
+                      </p>
                     </div>
-                  ))}
+                  ) : (
+                    visits.slice(0, 3).map((v) => (
+                      <div key={v.id} className="p-3.5 bg-[#FAF9F5] border border-[#E8E5DF] rounded-lg">
+                        <div className="flex justify-between items-start gap-2">
+                          <span className="font-medium text-xs sm:text-sm text-[#171717] min-w-0 break-words">{v.fullName}</span>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded shrink-0 whitespace-nowrap ${
+                            v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {v.status}
+                          </span>
+                        </div>
+                        <p className="text-xs text-stone-600 line-clamp-2 sm:truncate mt-1">{v.propertyTitle}</p>
+                        <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5 text-[11px] text-stone-500">
+                          <span className="break-words">{v.visitDate} ({v.timeSlot})</span>
+                          {v.pickupRequired && <span className="text-[#B99A63] font-medium whitespace-nowrap">VIP Chauffeur</span>}
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
@@ -980,13 +1106,26 @@ export default function AdminPage() {
                 </p>
               </div>
 
-              <button
-                onClick={handleExportLeadsCSV}
-                className="bg-white border border-[#E8E5DF] hover:border-stone-400 text-stone-800 text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto shadow-xs cursor-pointer"
-              >
-                <Download className="w-4 h-4 text-[#B99A63]" />
-                <span>Export Leads (CSV)</span>
-              </button>
+              <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={handleManualSync}
+                  disabled={isSyncing}
+                  className="flex-1 sm:flex-initial bg-white border border-[#E8E5DF] hover:border-stone-400 text-stone-800 text-xs font-semibold tracking-wider uppercase px-3.5 py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 text-[#B99A63] ${isSyncing ? 'animate-spin' : ''}`} />
+                  <span>{isSyncing ? 'Syncing...' : 'Sync Live'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleExportLeadsCSV}
+                  disabled={leads.length === 0}
+                  className="flex-1 sm:flex-initial bg-white border border-[#E8E5DF] hover:border-stone-400 text-stone-800 text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-40"
+                >
+                  <Download className="w-4 h-4 text-[#B99A63]" />
+                  <span>Export CSV</span>
+                </button>
+              </div>
             </div>
 
             {/* Filter and Search Bar */}
@@ -1022,125 +1161,34 @@ export default function AdminPage() {
 
             {/* Leads Table & Mobile/Tablet Cards */}
             <div className="bg-white border border-[#E8E5DF] rounded-xl overflow-hidden shadow-xs">
-              {/* Mobile & Tablet Card Grid (< lg) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
-                {filteredLeads.map((lead) => (
-                  <div key={lead.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-stone-900 text-sm break-words">{lead.fullName}</div>
-                        <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
-                          <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{lead.phone}</a>
-                          <span className="mx-1">·</span>
-                          <span>{lead.email}</span>
-                        </div>
-                      </div>
-                      <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap shrink-0 ${
-                        lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-800' :
-                        lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-800' :
-                        lead.leadStatus === 'Site Visit Scheduled' ? 'bg-purple-50 text-purple-800' :
-                        lead.leadStatus === 'Converted' ? 'bg-amber-50 text-amber-900' :
-                        'bg-stone-100 text-stone-600'
-                      }`}>
-                        {lead.leadStatus}
-                      </span>
-                    </div>
-
-                    <div className="bg-stone-50 p-2.5 rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-baseline gap-2">
-                        <span className="text-stone-500 text-[11px] shrink-0">Property:</span>
-                        <span className="font-medium text-stone-800 text-right break-words">{lead.propertyTitle || 'General Advisory'}</span>
-                      </div>
-                      {lead.budget && (
-                        <div className="flex justify-between items-baseline gap-2">
-                          <span className="text-stone-500 text-[11px] shrink-0">Budget:</span>
-                          <span className="text-stone-700 text-right">{lead.budget}</span>
-                        </div>
-                      )}
-                      {lead.preferredVisitDate && (
-                        <div className="flex justify-between items-baseline gap-2">
-                          <span className="text-[#B99A63] text-[11px] shrink-0">Visit Date:</span>
-                          <span className="text-[#B99A63] font-mono">{lead.preferredVisitDate}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {lead.message && (
-                      <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF] break-words">
-                        &ldquo;{lead.message}&rdquo;
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-[11px]">
-                      <span className="text-stone-400">
-                        {new Date(lead.createdAt).toLocaleDateString('en-IN')}
-                      </span>
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-stone-500 text-[10px] uppercase">Status:</span>
-                        <select
-                          value={lead.leadStatus}
-                          onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as LeadStatus)}
-                          className="bg-[#FAF9F5] border border-[#E8E5DF] text-base sm:text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
-                        >
-                          <option value="New">New</option>
-                          <option value="Contacted">Contacted</option>
-                          <option value="Qualified">Qualified</option>
-                          <option value="Site Visit Scheduled">Site Visit Scheduled</option>
-                          <option value="Converted">Converted</option>
-                          <option value="Lost">Lost</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Laptop & Desktop Table (lg+) */}
-              <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
-                    <tr>
-                      <th className="py-3 px-4">Customer Details</th>
-                      <th className="py-3 px-4">Interested Property</th>
-                      <th className="py-3 px-4">Source & Budget</th>
-                      <th className="py-3 px-4">Status & Notes</th>
-                      <th className="py-3 px-4">Received</th>
-                      <th className="py-3 px-4 text-right">Update Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E8E5DF]">
+              {filteredLeads.length === 0 ? (
+                <div className="py-14 px-6 text-center space-y-2">
+                  <Users className="w-9 h-9 text-stone-300 mx-auto" />
+                  <h3 className="font-serif text-lg text-[#171717]">
+                    {leads.length === 0 ? 'Waiting for Genuine Client Leads' : 'No Matching Leads Found'}
+                  </h3>
+                  <p className="text-xs text-stone-500 max-w-md mx-auto">
+                    {leads.length === 0
+                      ? 'Dummy/demo leads have been removed. Every real inquiry from your Contact page, Property enquiry forms, Callback modal, or Concierge streams here automatically in real time.'
+                      : 'Try clearing your search or status filter to view all genuine leads.'}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Mobile & Tablet Card Grid (< lg) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
                     {filteredLeads.map((lead) => (
-                      <tr key={lead.id} className="hover:bg-stone-50 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-semibold text-stone-900">{lead.fullName}</div>
-                          <div className="text-[11px] text-stone-500 mt-0.5">
-                            <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63]">{lead.phone}</a> · {lead.email}
+                      <div key={lead.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-stone-900 text-sm break-words">{lead.fullName}</div>
+                            <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
+                              <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{lead.phone}</a>
+                              <span className="mx-1">·</span>
+                              <span>{lead.email}</span>
+                            </div>
                           </div>
-                          {lead.message && (
-                            <p className="text-[11px] text-stone-600 mt-1 max-w-xs italic line-clamp-2">
-                              &ldquo;{lead.message}&rdquo;
-                            </p>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-stone-800">
-                          <span className="font-medium">{lead.propertyTitle || 'General Advisory'}</span>
-                          {lead.preferredVisitDate && (
-                            <span className="text-[11px] text-[#B99A63] block mt-0.5 font-mono">
-                              Visit: {lead.preferredVisitDate}
-                            </span>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-4 text-stone-700">
-                          <span className="inline-block px-1.5 py-0.5 bg-stone-100 rounded text-[10px] capitalize">
-                            {lead.leadSource.replace('_', ' ')}
-                          </span>
-                          <span className="text-[11px] text-stone-500 block mt-0.5">{lead.budget || 'Open'}</span>
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
+                          <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold whitespace-nowrap shrink-0 ${
                             lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-800' :
                             lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-800' :
                             lead.leadStatus === 'Site Visit Scheduled' ? 'bg-purple-50 text-purple-800' :
@@ -1149,31 +1197,157 @@ export default function AdminPage() {
                           }`}>
                             {lead.leadStatus}
                           </span>
-                        </td>
+                        </div>
 
-                        <td className="py-3.5 px-4 text-stone-500 text-[11px]">
-                          {new Date(lead.createdAt).toLocaleDateString('en-IN')}
-                        </td>
+                        <div className="bg-stone-50 p-2.5 rounded-lg text-xs space-y-1">
+                          <div className="flex justify-between items-baseline gap-2">
+                            <span className="text-stone-500 text-[11px] shrink-0">Property:</span>
+                            <span className="font-medium text-stone-800 text-right break-words">{lead.propertyTitle || 'General Advisory'}</span>
+                          </div>
+                          {lead.budget && (
+                            <div className="flex justify-between items-baseline gap-2">
+                              <span className="text-stone-500 text-[11px] shrink-0">Budget:</span>
+                              <span className="text-stone-700 text-right">{lead.budget}</span>
+                            </div>
+                          )}
+                          {lead.preferredVisitDate && (
+                            <div className="flex justify-between items-baseline gap-2">
+                              <span className="text-[#B99A63] text-[11px] shrink-0">Visit Date:</span>
+                              <span className="text-[#B99A63] font-mono">{lead.preferredVisitDate}</span>
+                            </div>
+                          )}
+                        </div>
 
-                        <td className="py-3.5 px-4 text-right">
-                          <select
-                            value={lead.leadStatus}
-                            onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as LeadStatus)}
-                            className="bg-[#FAF9F5] border border-[#E8E5DF] text-[11px] px-2 py-1 rounded text-stone-800 focus:outline-none"
-                          >
-                            <option value="New">New</option>
-                            <option value="Contacted">Contacted</option>
-                            <option value="Qualified">Qualified</option>
-                            <option value="Site Visit Scheduled">Site Visit Scheduled</option>
-                            <option value="Converted">Converted</option>
-                            <option value="Lost">Lost</option>
-                          </select>
-                        </td>
-                      </tr>
+                        {lead.message && (
+                          <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF] break-words">
+                            &ldquo;{lead.message}&rdquo;
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-[11px] gap-2">
+                          <span className="text-stone-400">
+                            {new Date(lead.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
+                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <select
+                              value={lead.leadStatus}
+                              onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as LeadStatus)}
+                              className="bg-[#FAF9F5] border border-[#E8E5DF] text-base sm:text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
+                            >
+                              <option value="New">New</option>
+                              <option value="Contacted">Contacted</option>
+                              <option value="Qualified">Qualified</option>
+                              <option value="Site Visit Scheduled">Site Visit Scheduled</option>
+                              <option value="Converted">Converted</option>
+                              <option value="Lost">Lost</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteLead(lead.id)}
+                              title="Delete lead"
+                              aria-label="Delete lead"
+                              className="p-2 text-red-500 hover:text-red-700 bg-red-50 rounded cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+
+                  {/* Laptop & Desktop Table (lg+) */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="py-3 px-4">Customer Details</th>
+                          <th className="py-3 px-4">Interested Property</th>
+                          <th className="py-3 px-4">Source & Budget</th>
+                          <th className="py-3 px-4">Status & Notes</th>
+                          <th className="py-3 px-4">Received</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E8E5DF]">
+                        {filteredLeads.map((lead) => (
+                          <tr key={lead.id} className="hover:bg-stone-50 transition-colors">
+                            <td className="py-3.5 px-4">
+                              <div className="font-semibold text-stone-900">{lead.fullName}</div>
+                              <div className="text-[11px] text-stone-500 mt-0.5">
+                                <a href={`tel:${lead.phone}`} className="hover:text-[#B99A63]">{lead.phone}</a> · {lead.email}
+                              </div>
+                              {lead.message && (
+                                <p className="text-[11px] text-stone-600 mt-1 max-w-xs italic line-clamp-2">
+                                  &ldquo;{lead.message}&rdquo;
+                                </p>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-stone-800">
+                              <span className="font-medium">{lead.propertyTitle || 'General Advisory'}</span>
+                              {lead.preferredVisitDate && (
+                                <span className="text-[11px] text-[#B99A63] block mt-0.5 font-mono">
+                                  Visit: {lead.preferredVisitDate}
+                                </span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-stone-700">
+                              <span className="inline-block px-1.5 py-0.5 bg-stone-100 rounded text-[10px] capitalize">
+                                {lead.leadSource.replace(/_/g, ' ')}
+                              </span>
+                              <span className="text-[11px] text-stone-500 block mt-0.5">{lead.budget || 'Open'}</span>
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              <span className={`inline-block px-2 py-0.5 rounded text-[10px] font-semibold ${
+                                lead.leadStatus === 'New' ? 'bg-blue-50 text-blue-800' :
+                                lead.leadStatus === 'Qualified' ? 'bg-emerald-50 text-emerald-800' :
+                                lead.leadStatus === 'Site Visit Scheduled' ? 'bg-purple-50 text-purple-800' :
+                                lead.leadStatus === 'Converted' ? 'bg-amber-50 text-amber-900' :
+                                'bg-stone-100 text-stone-600'
+                              }`}>
+                                {lead.leadStatus}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-stone-500 text-[11px] whitespace-nowrap">
+                              {new Date(lead.createdAt).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
+                            </td>
+
+                            <td className="py-3.5 px-4 text-right">
+                              <div className="inline-flex items-center justify-end gap-1.5">
+                                <select
+                                  value={lead.leadStatus}
+                                  onChange={(e) => handleUpdateLeadStatus(lead.id, e.target.value as LeadStatus)}
+                                  className="bg-[#FAF9F5] border border-[#E8E5DF] text-[11px] px-2 py-1 rounded text-stone-800 focus:outline-none"
+                                >
+                                  <option value="New">New</option>
+                                  <option value="Contacted">Contacted</option>
+                                  <option value="Qualified">Qualified</option>
+                                  <option value="Site Visit Scheduled">Site Visit Scheduled</option>
+                                  <option value="Converted">Converted</option>
+                                  <option value="Lost">Lost</option>
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteLead(lead.id)}
+                                  title="Delete lead"
+                                  aria-label="Delete lead"
+                                  className="p-1.5 text-stone-400 hover:text-red-600 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -1183,149 +1357,194 @@ export default function AdminPage() {
            ===================================================================== */}
         {activeTab === 'visits' && (
           <div className="space-y-6">
-            <div>
-              <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Private Site Visit Requests</h2>
-              <p className="text-xs text-stone-500 mt-1">
-                Coordinate security pre-clearance, chauffeur pick-up, and advisor attendance.
-              </p>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#171717]">Private Site Visit Requests</h2>
+                <p className="text-xs text-stone-500 mt-1">
+                  Genuine client site visit bookings stream here live for advisor coordination.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleManualSync}
+                disabled={isSyncing}
+                className="bg-white border border-[#E8E5DF] hover:border-stone-400 text-stone-800 text-xs font-semibold tracking-wider uppercase px-4 py-2.5 rounded-lg transition-all flex items-center justify-center gap-1.5 w-full sm:w-auto shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 text-[#B99A63] ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>{isSyncing ? 'Syncing...' : 'Sync Live Visits'}</span>
+              </button>
             </div>
 
             {/* Site Visits Table & Mobile/Tablet Cards */}
             <div className="bg-white border border-[#E8E5DF] rounded-xl overflow-hidden shadow-xs">
-              {/* Mobile & Tablet Card Grid (< lg) */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
-                {visits.map((v) => (
-                  <div key={v.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-stone-900 text-sm break-words">{v.fullName}</div>
-                        <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
-                          <a href={`tel:${v.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{v.phone}</a>
-                          <span className="mx-1">·</span>
-                          <span>{v.email}</span>
-                        </div>
-                      </div>
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap shrink-0 ${
-                        v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' :
-                        v.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
-                        'bg-stone-100 text-stone-600'
-                      }`}>
-                        {v.status}
-                      </span>
-                    </div>
-
-                    <div className="bg-stone-50 p-2.5 rounded-lg text-xs space-y-1">
-                      <div className="flex justify-between items-baseline gap-2">
-                        <span className="text-stone-500 text-[11px] shrink-0">Property:</span>
-                        <span className="font-medium text-stone-800 text-right break-words">{v.propertyTitle}</span>
-                      </div>
-                      <div className="flex justify-between items-baseline gap-2">
-                        <span className="text-stone-500 text-[11px] shrink-0">Slot:</span>
-                        <span className="font-mono text-stone-800 text-right">{v.visitDate} ({v.timeSlot})</span>
-                      </div>
-                      <div className="flex justify-between items-center pt-1">
-                        <span className="text-stone-500 text-[11px]">Transport:</span>
-                        {v.pickupRequired ? (
-                          <span className="bg-[#B99A63]/20 text-[#B99A63] text-[10px] font-semibold px-2 py-0.5 rounded">
-                            Chauffeur Pick-up
-                          </span>
-                        ) : (
-                          <span className="text-stone-400 text-[11px]">Self-transport</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {v.notes && (
-                      <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF] break-words">
-                        &ldquo;{v.notes}&rdquo;
-                      </p>
-                    )}
-
-                    <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-[11px]">
-                      <span className="text-stone-400 text-[10px] uppercase">Update Status</span>
-                      <select
-                        value={v.status}
-                        onChange={(e) => handleUpdateVisitStatus(v.id, e.target.value as any)}
-                        className="bg-[#FAF9F5] border border-[#E8E5DF] text-base sm:text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
-                      >
-                        <option value="Pending">Pending</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Completed">Completed</option>
-                        <option value="Cancelled">Cancelled</option>
-                      </select>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Laptop & Desktop Table (lg+) */}
-              <div className="hidden lg:block overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
-                    <tr>
-                      <th className="py-3 px-4">Visitor</th>
-                      <th className="py-3 px-4">Property</th>
-                      <th className="py-3 px-4">Requested Date & Slot</th>
-                      <th className="py-3 px-4">VIP Chauffeur</th>
-                      <th className="py-3 px-4">Status</th>
-                      <th className="py-3 px-4 text-right">Action</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#E8E5DF]">
+              {visits.length === 0 ? (
+                <div className="py-14 px-6 text-center space-y-2">
+                  <Calendar className="w-9 h-9 text-stone-300 mx-auto" />
+                  <h3 className="font-serif text-lg text-[#171717]">No Genuine Site Visits Scheduled Yet</h3>
+                  <p className="text-xs text-stone-500 max-w-md mx-auto">
+                    Sample visits have been cleared. When a prospective client books a viewing via a property page or the AI Concierge, it appears here immediately.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  {/* Mobile & Tablet Card Grid (< lg) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:hidden divide-y md:divide-y-0 md:gap-4 md:p-4 bg-white md:bg-[#FAF9F5]/40">
                     {visits.map((v) => (
-                      <tr key={v.id} className="hover:bg-stone-50 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <span className="font-semibold text-stone-900 block">{v.fullName}</span>
-                          <span className="text-[11px] text-stone-500">{v.phone} · {v.email}</span>
-                          {v.notes && <p className="text-[11px] text-stone-400 italic mt-0.5">&ldquo;{v.notes}&rdquo;</p>}
-                        </td>
-
-                        <td className="py-3.5 px-4 font-medium text-stone-800">
-                          {v.propertyTitle}
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          <span className="font-mono text-stone-900 block">{v.visitDate}</span>
-                          <span className="text-[11px] text-stone-500">{v.timeSlot}</span>
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          {v.pickupRequired ? (
-                            <span className="bg-[#B99A63]/20 text-[#B99A63] text-[10px] font-semibold px-2 py-0.5 rounded">
-                              Chauffeur Pick-up
-                            </span>
-                          ) : (
-                            <span className="text-stone-400 text-[11px]">Self-transport</span>
-                          )}
-                        </td>
-
-                        <td className="py-3.5 px-4">
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                      <div key={v.id} className="p-4 space-y-2.5 bg-white md:border md:border-[#E8E5DF] md:rounded-xl min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <div className="font-semibold text-stone-900 text-sm break-words">{v.fullName}</div>
+                            <div className="text-[11px] text-stone-500 mt-0.5 break-all sm:break-normal">
+                              <a href={`tel:${v.phone}`} className="hover:text-[#B99A63] text-[#171717] font-medium">{v.phone}</a>
+                              <span className="mx-1">·</span>
+                              <span>{v.email}</span>
+                            </div>
+                          </div>
+                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded whitespace-nowrap shrink-0 ${
                             v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' :
                             v.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
                             'bg-stone-100 text-stone-600'
                           }`}>
                             {v.status}
                           </span>
-                        </td>
+                        </div>
 
-                        <td className="py-3.5 px-4 text-right">
-                          <select
-                            value={v.status}
-                            onChange={(e) => handleUpdateVisitStatus(v.id, e.target.value as any)}
-                            className="bg-[#FAF9F5] border border-[#E8E5DF] text-[11px] px-2 py-1 rounded text-stone-800 focus:outline-none"
-                          >
-                            <option value="Pending">Pending</option>
-                            <option value="Confirmed">Confirmed</option>
-                            <option value="Completed">Completed</option>
-                            <option value="Cancelled">Cancelled</option>
-                          </select>
-                        </td>
-                      </tr>
+                        <div className="bg-stone-50 p-2.5 rounded-lg text-xs space-y-1">
+                          <div className="flex justify-between items-baseline gap-2">
+                            <span className="text-stone-500 text-[11px] shrink-0">Property:</span>
+                            <span className="font-medium text-stone-800 text-right break-words">{v.propertyTitle}</span>
+                          </div>
+                          <div className="flex justify-between items-baseline gap-2">
+                            <span className="text-stone-500 text-[11px] shrink-0">Slot:</span>
+                            <span className="font-mono text-stone-800 text-right">{v.visitDate} ({v.timeSlot})</span>
+                          </div>
+                          <div className="flex justify-between items-center pt-1">
+                            <span className="text-stone-500 text-[11px]">Transport:</span>
+                            {v.pickupRequired ? (
+                              <span className="bg-[#B99A63]/20 text-[#B99A63] text-[10px] font-semibold px-2 py-0.5 rounded">
+                                Chauffeur Pick-up
+                              </span>
+                            ) : (
+                              <span className="text-stone-400 text-[11px]">Self-transport</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {v.notes && (
+                          <p className="text-[11px] text-stone-600 italic bg-[#FAF9F5] p-2 rounded border border-[#E8E5DF] break-words">
+                            &ldquo;{v.notes}&rdquo;
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t border-stone-100 text-[11px] gap-2">
+                          <span className="text-stone-400 text-[10px] uppercase">Status</span>
+                          <div className="flex items-center gap-1.5">
+                            <select
+                              value={v.status}
+                              onChange={(e) => handleUpdateVisitStatus(v.id, e.target.value as any)}
+                              className="bg-[#FAF9F5] border border-[#E8E5DF] text-base sm:text-xs px-2.5 py-1.5 rounded text-stone-800 focus:outline-none min-h-[36px]"
+                            >
+                              <option value="Pending">Pending</option>
+                              <option value="Confirmed">Confirmed</option>
+                              <option value="Completed">Completed</option>
+                              <option value="Cancelled">Cancelled</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteVisit(v.id)}
+                              title="Delete site visit"
+                              aria-label="Delete site visit"
+                              className="p-2 text-red-500 hover:text-red-700 bg-red-50 rounded cursor-pointer min-h-[36px] min-w-[36px] flex items-center justify-center"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ))}
-                  </tbody>
-                </table>
-              </div>
+                  </div>
+
+                  {/* Laptop & Desktop Table (lg+) */}
+                  <div className="hidden lg:block overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-[#FAF9F5] border-b border-[#E8E5DF] text-stone-500 uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="py-3 px-4">Visitor</th>
+                          <th className="py-3 px-4">Property</th>
+                          <th className="py-3 px-4">Requested Date & Slot</th>
+                          <th className="py-3 px-4">VIP Chauffeur</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#E8E5DF]">
+                        {visits.map((v) => (
+                          <tr key={v.id} className="hover:bg-stone-50 transition-colors">
+                            <td className="py-3.5 px-4">
+                              <span className="font-semibold text-stone-900 block">{v.fullName}</span>
+                              <span className="text-[11px] text-stone-500">{v.phone} · {v.email}</span>
+                              {v.notes && <p className="text-[11px] text-stone-400 italic mt-0.5">&ldquo;{v.notes}&rdquo;</p>}
+                            </td>
+
+                            <td className="py-3.5 px-4 font-medium text-stone-800">
+                              {v.propertyTitle}
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              <span className="font-mono text-stone-900 block">{v.visitDate}</span>
+                              <span className="text-[11px] text-stone-500">{v.timeSlot}</span>
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              {v.pickupRequired ? (
+                                <span className="bg-[#B99A63]/20 text-[#B99A63] text-[10px] font-semibold px-2 py-0.5 rounded">
+                                  Chauffeur Pick-up
+                                </span>
+                              ) : (
+                                <span className="text-stone-400 text-[11px]">Self-transport</span>
+                              )}
+                            </td>
+
+                            <td className="py-3.5 px-4">
+                              <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                                v.status === 'Confirmed' ? 'bg-emerald-100 text-emerald-800' :
+                                v.status === 'Pending' ? 'bg-amber-100 text-amber-800' :
+                                'bg-stone-100 text-stone-600'
+                              }`}>
+                                {v.status}
+                              </span>
+                            </td>
+
+                            <td className="py-3.5 px-4 text-right">
+                              <div className="inline-flex items-center justify-end gap-1.5">
+                                <select
+                                  value={v.status}
+                                  onChange={(e) => handleUpdateVisitStatus(v.id, e.target.value as any)}
+                                  className="bg-[#FAF9F5] border border-[#E8E5DF] text-[11px] px-2 py-1 rounded text-stone-800 focus:outline-none"
+                                >
+                                  <option value="Pending">Pending</option>
+                                  <option value="Confirmed">Confirmed</option>
+                                  <option value="Completed">Completed</option>
+                                  <option value="Cancelled">Cancelled</option>
+                                </select>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteVisit(v.id)}
+                                  title="Delete site visit"
+                                  aria-label="Delete site visit"
+                                  className="p-1.5 text-stone-400 hover:text-red-600 transition-colors cursor-pointer"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -1520,28 +1739,28 @@ export default function AdminPage() {
               <div>
                 <h2 className="font-serif text-2xl sm:text-3xl text-[#171717] flex items-center gap-2">
                   <Database className="w-5 h-5 sm:w-6 sm:h-6 text-[#B99A63] shrink-0" />
-                  <span>Client Storage & Realtime Sync</span>
+                  <span>Realtime Inquiries & Storage Sync</span>
                 </h2>
                 <p className="text-xs text-stone-500 mt-1">
-                  Instant client-side persistence via browser <code className="bg-[#FAF9F5] px-1.5 py-0.5 rounded border border-[#E8E5DF] text-stone-700">localStorage</code> with cross-tab live updates.
+                  Live Server-Sent Events (SSE) + cross-tab BroadcastChannel sync for genuine client leads and site visits. Zero fake seed leads.
                 </p>
               </div>
               <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-full text-xs text-emerald-800 font-medium self-start shrink-0">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Realtime Active</span>
+                <span className={`w-2 h-2 rounded-full ${isRealtimeConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`}></span>
+                <span>{isRealtimeConnected ? 'SSE Stream Live' : 'Reconnecting'}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 pt-2">
               <div className="bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl p-4">
-                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Storage Engine</div>
-                <div className="text-sm font-semibold text-[#171717]">Browser LocalStorage</div>
-                <div className="text-[11px] text-stone-500 mt-0.5">Zero external latency</div>
+                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Realtime Engine</div>
+                <div className="text-sm font-semibold text-[#171717]">SSE + BroadcastChannel</div>
+                <div className="text-[11px] text-stone-500 mt-0.5">Live push across devices & tabs</div>
               </div>
               <div className="bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl p-4">
-                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Live Sync Protocol</div>
-                <div className="text-sm font-semibold text-[#171717]">Storage Event Bus</div>
-                <div className="text-[11px] text-stone-500 mt-0.5">Instant multi-tab push</div>
+                <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Lead Integrity</div>
+                <div className="text-sm font-semibold text-[#171717]">100% Genuine Only</div>
+                <div className="text-[11px] text-stone-500 mt-0.5">Validated submissions, zero mocks</div>
               </div>
               <div className="bg-[#FAF9F5] border border-[#E8E5DF] rounded-xl p-4">
                 <div className="text-[11px] uppercase tracking-wider text-stone-400 font-semibold mb-1">Catalog Range</div>
@@ -1552,8 +1771,8 @@ export default function AdminPage() {
 
             <div className="pt-4 border-t border-[#E8E5DF] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <div>
-                <div className="text-xs font-semibold text-stone-800">Reset Client Storage to Default Seeds</div>
-                <div className="text-xs text-stone-500">Restores clean property listings (₹ 40L – ₹ 90L), initial leads, and site visit logs.</div>
+                <div className="text-xs font-semibold text-stone-800">Reset Catalog & Clear All Leads/Visits</div>
+                <div className="text-xs text-stone-500">Restores default property listings (₹ 40L – ₹ 90L) and clears lead & site visit records to empty.</div>
               </div>
               <button
                 type="button"

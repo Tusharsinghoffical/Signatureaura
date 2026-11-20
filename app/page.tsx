@@ -26,7 +26,7 @@ import {
   Camera
 } from 'lucide-react';
 import { BUSINESS_CONFIG, getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
-import { createStoredLead } from '@/lib/client-storage';
+import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
 import { SAMPLE_PROPERTIES, SAMPLE_PROJECTS, SAMPLE_LOCATIONS, SAMPLE_TESTIMONIALS } from '@/lib/data/sample-data';
 import PropertyCard from '@/components/properties/PropertyCard';
 import AnnouncementBar from '@/components/layout/AnnouncementBar';
@@ -115,6 +115,12 @@ export default function HomePage() {
 
   const handleHomeContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const check = validateGenuineContact({
+      fullName: homeContact.name,
+      phone: homeContact.phone,
+      email: homeContact.email,
+    });
+    if (!check.valid) return;
     setIsSubmitting(true);
     try {
       createStoredLead({

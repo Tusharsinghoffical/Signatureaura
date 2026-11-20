@@ -31,7 +31,7 @@ import Footer from '@/components/layout/Footer';
 import FloatingContactSystem from '@/components/floating/FloatingContactSystem';
 import SharePageButton from '@/components/common/SharePageButton';
 import { SAMPLE_PROJECTS } from '@/lib/data/sample-data';
-import { createStoredLead } from '@/lib/client-storage';
+import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
 import { getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
 import { ProjectDevelopment, ConstructionWorkUpdate, ProjectWorkVideo } from '@/types/real-estate';
 
@@ -86,6 +86,12 @@ export default function ProjectDetailClient({
 
   const handleBrochureSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const check = validateGenuineContact({
+      fullName: form.name,
+      phone: form.phone,
+      email: form.email,
+    });
+    if (!check.valid) return;
     setIsSubmitting(true);
     try {
       createStoredLead({

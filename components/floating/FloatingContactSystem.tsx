@@ -16,7 +16,7 @@ import {
   Calendar
 } from 'lucide-react';
 import { BUSINESS_CONFIG, getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
-import { createStoredLead } from '@/lib/client-storage';
+import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
 import PropertyAssistantModal from '@/components/chatbot/PropertyAssistantModal';
 
 export default function FloatingContactSystem() {
@@ -54,8 +54,18 @@ export default function FloatingContactSystem() {
 
   const handleCallbackSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (formData.website_url_check.trim()) {
+      return;
+    }
     setErrorMessage('');
+
+    const check = validateGenuineContact(formData);
+    if (!check.valid) {
+      setErrorMessage(check.error || 'Please provide valid contact details.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       createStoredLead({

@@ -19,7 +19,7 @@ import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import FloatingContactSystem from '@/components/floating/FloatingContactSystem';
 import { BUSINESS_CONFIG, getWhatsAppLink } from '@/lib/config';
-import { createStoredLead } from '@/lib/client-storage';
+import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
 
 function ContactFormContent() {
   const searchParams = useSearchParams();
@@ -41,8 +41,15 @@ function ContactFormContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setErrorMsg('');
+
+    const check = validateGenuineContact(formData);
+    if (!check.valid) {
+      setErrorMsg(check.error || 'Please enter valid contact details.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     // Construct ultra-detailed, professional WhatsApp inquiry message
     const formattedWhatsAppText = 

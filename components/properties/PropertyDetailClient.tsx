@@ -34,7 +34,7 @@ import SharePageButton from '@/components/common/SharePageButton';
 import { SAMPLE_PROPERTIES } from '@/lib/data/sample-data';
 import { getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
 import { Property } from '@/types/real-estate';
-import { createStoredLead } from '@/lib/client-storage';
+import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
 
 const resolvePartnerPhoto = (name?: string, fallbackPhoto?: string) => {
   if (!name) return fallbackPhoto || '/assets/team/rakesh-desale-patil.jpg';
@@ -103,8 +103,15 @@ export default function PropertyDetailClient({
 
   const handleEnquirySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setEnquiryError('');
+
+    const check = validateGenuineContact(enquiryForm);
+    if (!check.valid) {
+      setEnquiryError(check.error || 'Please enter a valid name, phone, and email.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       createStoredLead({

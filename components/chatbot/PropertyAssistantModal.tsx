@@ -26,7 +26,11 @@ import {
 import { BUSINESS_CONFIG, getWhatsAppLink } from '@/lib/config';
 import { SAMPLE_PROPERTIES } from '@/lib/data/sample-data';
 import { retrieveWebsiteKnowledge } from '@/lib/rag/knowledge-retriever';
-import { createStoredSiteVisit, createStoredLead } from '@/lib/client-storage';
+import {
+  createStoredSiteVisit,
+  createStoredLead,
+  validateGenuineContact,
+} from '@/lib/client-storage';
 import ChatMessageContent from './ChatMessageContent';
 
 interface SourceCitation {
@@ -48,6 +52,7 @@ interface MatchedPropertyItem {
   possessionDate?: string;
   reraNumber?: string;
   featuredImage?: string;
+  images?: { url: string; caption?: string }[];
   highlightFeatures?: string[];
   locality?: string;
   city?: string;
@@ -161,10 +166,13 @@ export default function PropertyAssistantModal({
   useEffect(() => {
     if (isOpen && !isMinimized && activeTab === 'chat') {
       scrollToBottom();
-      const timer = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 150);
-      return () => clearTimeout(timer);
+      // Only auto-focus input on desktop/tablet so mobile virtual keyboard doesn't cover the chat on open
+      if (typeof window !== 'undefined' && window.innerWidth >= 768) {
+        const timer = setTimeout(() => {
+          inputRef.current?.focus();
+        }, 150);
+        return () => clearTimeout(timer);
+      }
     }
   }, [isOpen, isMinimized, activeTab]);
 
@@ -236,9 +244,9 @@ export default function PropertyAssistantModal({
       if (phoneMatch || emailMatch) {
         createStoredLead({
           fullName: 'Website Inquirer',
-          phone: phoneMatch ? phoneMatch[0] : '',
-          email: emailMatch ? emailMatch[0] : '',
-          leadSource: 'ai_chatbot',
+          phone: phoneMatch ? phoneMatch[0].trim() : '',
+          email: emailMatch ? emailMatch[0].trim() : '',
+          leadSource: 'ai_assistant',
           propertyTitle:
             currentPropertyTitle || rag.matchedProperties[0]?.title || 'General Inquiry',
           message: query,
@@ -299,15 +307,30 @@ export default function PropertyAssistantModal({
   const handleInChatBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!bookingProperty) return;
-    setIsBookingSubmitting(true);
     setBookingSuccessMsg('');
     setBookingErrorMsg('');
 
+    const validation = validateGenuineContact({
+      fullName: bookingForm.fullName,
+      phone: bookingForm.phone,
+      email: bookingForm.email,
+    });
+    if (!validation.valid) {
+      setBookingErrorMsg(validation.error || 'Please provide valid name, phone, and email.');
+      return;
+    }
+    if (!bookingForm.visitDate) {
+      setBookingErrorMsg('Please select a preferred site visit date.');
+      return;
+    }
+
+    setIsBookingSubmitting(true);
+
     try {
       createStoredSiteVisit({
-        fullName: bookingForm.fullName,
-        phone: bookingForm.phone,
-        email: bookingForm.email,
+        fullName: bookingForm.fullName.trim(),
+        phone: bookingForm.phone.trim(),
+        email: bookingForm.email.trim(),
         propertyId: bookingProperty.id,
         propertyTitle: bookingProperty.title,
         visitDate: bookingForm.visitDate,
@@ -425,7 +448,7 @@ export default function PropertyAssistantModal({
         role="dialog"
         aria-label="Signature Aura Property Concierge"
         className={`relative flex flex-col bg-[#FAF9F5] overflow-hidden pointer-events-auto transition-all duration-200 ease-out
-          w-full h-[86dvh] max-h-[86dvh] rounded-t-2xl border-t border-[#E4DFD4] shadow-2xl
+          w-full h-[100dvh] max-h-[100dvh] rounded-none border-0 shadow-none
           sm:rounded-2xl sm:border sm:border-[#DFD9CE] sm:shadow-[0_24px_64px_-16px_rgba(0,0,0,0.28)]
           ${
             isExpanded
@@ -435,23 +458,14 @@ export default function PropertyAssistantModal({
         `}
       >
         {/* Single Architectural Dark Header */}
-        <header className="bg-[#141416] text-[#FAF9F5] px-4 pt-2 pb-3 sm:py-3 border-b border-[#26262A] shrink-0">
-          {/* Subtle Mobile Drag Indicator */}
-          <div
-            onClick={() => setIsMinimized(true)}
-            className="sm:hidden w-full flex justify-center pb-2 cursor-pointer touch-manipulation"
-            aria-label="Tap to minimize"
-          >
-            <span className="w-10 h-1 rounded-full bg-stone-600" />
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
+        <header className="bg-[#141416] text-[#FAF9F5] px-3.5 sm:px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3 sm:py-3 border-b border-[#26262A] shrink-0">
+          <div className="flex items-center justify-between gap-2.5">
             <div className="flex items-center gap-2.5 min-w-0">
               <div className="w-9 h-9 rounded-full bg-[#1E1E22] border border-[#B99A63]/60 flex items-center justify-center shrink-0">
                 <BotMessageSquare className="w-4 h-4 text-[#E8D39E]" />
               </div>
               <div className="min-w-0">
-                <h3 className="font-serif text-sm sm:text-[15px] font-medium text-[#FAF9F5] truncate leading-snug">
+                <h3 className="font-serif text-[15px] font-medium text-[#FAF9F5] truncate leading-snug">
                   Signature Aura Concierge
                 </h3>
                 <p className="text-[11px] text-stone-400 truncate leading-tight">
@@ -460,13 +474,13 @@ export default function PropertyAssistantModal({
               </div>
             </div>
 
-            <div className="flex items-center gap-0.5 shrink-0">
+            <div className="flex items-center gap-1 shrink-0">
               <button
                 type="button"
                 onClick={handleClear}
                 title="Reset conversation"
                 aria-label="Clear chat history"
-                className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
+                className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
               >
                 <RefreshCw className="w-4 h-4" />
               </button>
@@ -476,7 +490,7 @@ export default function PropertyAssistantModal({
                 onClick={() => setIsMinimized(true)}
                 title="Minimize"
                 aria-label="Minimize chat"
-                className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
+                className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
               >
                 <ChevronDown className="w-4 h-4" />
               </button>
@@ -486,7 +500,7 @@ export default function PropertyAssistantModal({
                 onClick={() => setIsExpanded(!isExpanded)}
                 title={isExpanded ? 'Compact view' : 'Expand view'}
                 aria-label={isExpanded ? 'Restore compact view' : 'Expand window'}
-                className="hidden sm:flex w-8 h-8 items-center justify-center text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
+                className="hidden sm:flex w-8 h-8 items-center justify-center text-stone-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
               >
                 {isExpanded ? (
                   <Minimize2 className="w-3.5 h-3.5" />
@@ -500,7 +514,7 @@ export default function PropertyAssistantModal({
                 onClick={onClose}
                 title="Close"
                 aria-label="Close assistant"
-                className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
+                className="w-9 h-9 sm:w-8 sm:h-8 flex items-center justify-center text-stone-300 hover:text-white hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -510,30 +524,31 @@ export default function PropertyAssistantModal({
 
         {/* Unified Segmented Navigation + Quick Connect Bar */}
         <div className="bg-[#F3EFE6] border-b border-[#E5E0D5] px-3 py-2 flex items-center justify-between gap-2 shrink-0">
-          <div className="inline-flex items-center bg-[#E7E2D6] p-0.5 rounded-lg">
+          <div className="inline-flex items-center bg-[#E7E2D6] p-0.5 rounded-lg min-w-0">
             <button
               type="button"
               onClick={() => setActiveTab('chat')}
-              className={`touch-manipulation px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[34px] ${
+              className={`touch-manipulation px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[36px] ${
                 activeTab === 'chat'
                   ? 'bg-[#141416] text-[#FAF9F5] shadow-2xs'
                   : 'text-stone-700 hover:text-[#141416]'
               }`}
             >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>Advisory Chat</span>
+              <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+              <span className="sm:hidden">Chat</span>
+              <span className="hidden sm:inline">Advisory Chat</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTab('inventory')}
-              className={`touch-manipulation px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[34px] tabular-nums ${
+              className={`touch-manipulation px-2.5 sm:px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 min-h-[36px] tabular-nums ${
                 activeTab === 'inventory'
                   ? 'bg-[#141416] text-[#FAF9F5] shadow-2xs'
                   : 'text-stone-700 hover:text-[#141416]'
               }`}
             >
-              <Building className="w-3.5 h-3.5" />
+              <Building className="w-3.5 h-3.5 shrink-0" />
               <span>Listings ({ragProperties.length})</span>
             </button>
           </div>
@@ -543,9 +558,9 @@ export default function PropertyAssistantModal({
               href={`tel:${BUSINESS_CONFIG.phoneRaw}`}
               title="Call Advisory Desk"
               aria-label="Call Advisory Desk"
-              className="touch-manipulation inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white border border-[#E2DDD2] hover:border-[#B99A63] text-[#171717] text-xs font-medium transition-colors min-h-[34px]"
+              className="touch-manipulation inline-flex items-center justify-center gap-1 w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-lg bg-white border border-[#E2DDD2] hover:border-[#B99A63] text-[#171717] text-xs font-medium transition-colors sm:min-h-[36px]"
             >
-              <Phone className="w-3.5 h-3.5 text-[#845E1B]" />
+              <Phone className="w-4 h-4 sm:w-3.5 sm:h-3.5 text-[#845E1B]" />
               <span className="hidden sm:inline">Call</span>
             </a>
 
@@ -557,10 +572,10 @@ export default function PropertyAssistantModal({
               rel="noopener noreferrer"
               title="Chat on WhatsApp"
               aria-label="Chat on WhatsApp"
-              className="touch-manipulation inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1FB858] text-white text-xs font-medium transition-colors min-h-[34px] whitespace-nowrap"
+              className="touch-manipulation inline-flex items-center justify-center gap-1 w-9 h-9 sm:w-auto sm:h-auto sm:px-2.5 sm:py-1.5 rounded-lg bg-[#25D366] hover:bg-[#1FB858] text-white text-xs font-medium transition-colors sm:min-h-[36px] whitespace-nowrap"
             >
-              <MessageCircle className="w-3.5 h-3.5" />
-              <span>WhatsApp</span>
+              <MessageCircle className="w-4 h-4 sm:w-3.5 sm:h-3.5" />
+              <span className="hidden sm:inline">WhatsApp</span>
             </a>
           </div>
         </div>
@@ -587,7 +602,7 @@ export default function PropertyAssistantModal({
                   key={item.label}
                   type="button"
                   onClick={() => handleSend(item.query)}
-                  className="touch-manipulation whitespace-nowrap shrink-0 text-[11px] sm:text-xs font-medium text-stone-700 hover:text-[#141416] bg-[#FAF9F5] hover:bg-[#F0ECE2] border border-[#E6E1D6] hover:border-[#B99A63]/60 px-2.5 py-1.5 rounded-lg transition-colors min-h-[34px]"
+                  className="touch-manipulation whitespace-nowrap shrink-0 text-xs font-medium text-stone-700 hover:text-[#141416] bg-[#FAF9F5] hover:bg-[#F0ECE2] border border-[#E6E1D6] hover:border-[#B99A63]/60 px-3 py-1.5 rounded-lg transition-colors min-h-[36px]"
                 >
                   {item.label}
                 </button>
@@ -595,7 +610,7 @@ export default function PropertyAssistantModal({
             </div>
 
             {/* Scrollable Messages Area */}
-            <div className="flex-1 overflow-y-auto px-3.5 py-4 space-y-4 bg-[#FAF9F5] chatbot-scroll-container">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain px-3 sm:px-3.5 py-3.5 sm:py-4 space-y-4 bg-[#FAF9F5] chatbot-scroll-container">
               {messages.map((msg, idx) => {
                 const isUser = msg.role === 'user';
                 const showFollowUps =
@@ -607,7 +622,7 @@ export default function PropertyAssistantModal({
                 return (
                   <div
                     key={msg.id}
-                    className={`flex flex-col ${isUser ? 'items-end' : 'items-start'}`}
+                    className={`flex flex-col min-w-0 ${isUser ? 'items-end' : 'items-start'}`}
                   >
                     {/* Quiet sender & timestamp line above bubble */}
                     <span className="text-[11px] text-stone-500 mb-1 px-1">
@@ -615,7 +630,7 @@ export default function PropertyAssistantModal({
                     </span>
 
                     <div
-                      className={`max-w-[92%] sm:max-w-[86%] px-3.5 py-3 text-xs sm:text-sm leading-relaxed ${
+                      className={`max-w-[94%] sm:max-w-[86%] min-w-0 px-3.5 py-3 text-[13.5px] sm:text-sm leading-relaxed ${
                         isUser
                           ? 'bg-[#141416] text-[#FAF9F5] rounded-2xl rounded-tr-sm shadow-xs'
                           : 'bg-white border border-[#E6E1D6] text-[#1F1F1F] rounded-2xl rounded-tl-sm shadow-[0_1px_2px_rgba(0,0,0,0.03)]'
@@ -652,18 +667,19 @@ export default function PropertyAssistantModal({
                               const locality = prop.location?.locality || prop.locality || '';
                               const city = prop.location?.city || prop.city || '';
                               const locationLabel = [locality, city].filter(Boolean).join(', ');
+                              const thumbUrl = prop.featuredImage || prop.images?.[0]?.url;
 
                               return (
                                 <div
                                   key={prop.id}
-                                  className="p-2.5 bg-[#FAF9F5] border border-[#E6E1D6] hover:border-[#B99A63]/60 rounded-xl transition-colors flex flex-col gap-2.5"
+                                  className="p-2.5 bg-[#FAF9F5] border border-[#E6E1D6] hover:border-[#B99A63]/60 rounded-xl transition-colors flex flex-col gap-2.5 min-w-0"
                                 >
-                                  <div className="flex items-start gap-2.5">
+                                  <div className="flex items-start gap-2.5 min-w-0">
                                     {/* Property Thumbnail */}
                                     <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-stone-200 shrink-0">
-                                      {prop.featuredImage ? (
+                                      {thumbUrl ? (
                                         <Image
-                                          src={prop.featuredImage}
+                                          src={thumbUrl}
                                           alt={prop.title}
                                           fill
                                           sizes="64px"
@@ -678,7 +694,7 @@ export default function PropertyAssistantModal({
                                     </div>
 
                                     <div className="min-w-0 flex-1">
-                                      <h4 className="font-serif text-xs sm:text-[13px] font-semibold text-[#141416] line-clamp-1">
+                                      <h4 className="font-serif text-[13px] font-semibold text-[#141416] line-clamp-1">
                                         {prop.title}
                                       </h4>
                                       <p className="text-xs font-semibold text-[#845E1B] tabular-nums mt-0.5">
@@ -701,21 +717,21 @@ export default function PropertyAssistantModal({
                                     </div>
                                   </div>
 
-                                  <div className="pt-2 border-t border-[#EAE5DA] flex items-center justify-between gap-2">
+                                  <div className="pt-2 border-t border-[#EAE5DA] flex flex-wrap items-center justify-between gap-2">
                                     <Link
                                       href={`/properties/${prop.slug}`}
                                       onClick={() => setIsMinimized(true)}
-                                      className="touch-manipulation text-xs font-medium text-stone-700 hover:text-[#141416] inline-flex items-center gap-0.5 px-1.5 py-1.5 min-h-[36px]"
+                                      className="touch-manipulation text-xs font-medium text-stone-700 hover:text-[#141416] inline-flex items-center gap-0.5 px-1.5 py-1.5 min-h-[38px]"
                                     >
                                       <span>Details</span>
                                       <ChevronRight className="w-3.5 h-3.5" />
                                     </Link>
 
-                                    <div className="flex items-center gap-1.5">
+                                    <div className="flex items-center gap-1.5 shrink-0">
                                       <button
                                         type="button"
                                         onClick={() => setBookingProperty(prop)}
-                                        className="touch-manipulation inline-flex items-center gap-1 bg-[#141416] hover:bg-[#B99A63] text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px] whitespace-nowrap"
+                                        className="touch-manipulation inline-flex items-center gap-1 bg-[#141416] hover:bg-[#B99A63] text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[38px] whitespace-nowrap"
                                       >
                                         <Calendar className="w-3.5 h-3.5" />
                                         <span>Book Visit</span>
@@ -751,7 +767,7 @@ export default function PropertyAssistantModal({
                               key={sIdx}
                               href={source.url}
                               onClick={() => setIsMinimized(true)}
-                              className="inline-flex items-center gap-1 text-stone-700 hover:text-[#845E1B] underline underline-offset-2 truncate max-w-[200px]"
+                              className="inline-flex items-center gap-1 text-stone-700 hover:text-[#845E1B] underline underline-offset-2 truncate max-w-[190px]"
                             >
                               <span className="truncate">{source.title}</span>
                               <ExternalLink className="w-2.5 h-2.5 shrink-0" />
@@ -763,13 +779,13 @@ export default function PropertyAssistantModal({
 
                     {/* Follow-up Prompts (shown cleanly only below the latest assistant message) */}
                     {showFollowUps && (
-                      <div className="mt-2 flex flex-wrap gap-1.5 max-w-[92%] sm:max-w-[86%]">
+                      <div className="mt-2 flex flex-wrap gap-1.5 max-w-[94%] sm:max-w-[86%]">
                         {msg.suggestedFollowUps!.map((q, qIdx) => (
                           <button
                             key={qIdx}
                             type="button"
                             onClick={() => handleSend(q)}
-                            className="touch-manipulation text-xs text-stone-700 hover:text-[#141416] bg-white hover:bg-[#F3EFE6] border border-[#E2DDD2] hover:border-[#B99A63] px-3 py-1.5 rounded-lg transition-colors text-left min-h-[36px]"
+                            className="touch-manipulation text-xs text-stone-700 hover:text-[#141416] bg-white hover:bg-[#F3EFE6] border border-[#E2DDD2] hover:border-[#B99A63] px-3 py-2 rounded-lg transition-colors text-left min-h-[38px]"
                           >
                             {q}
                           </button>
@@ -983,7 +999,7 @@ export default function PropertyAssistantModal({
             </div>
 
             {/* Scrollable Listings */}
-            <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-3 chatbot-scroll-container pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div className="flex-1 overflow-y-auto overflow-x-hidden overscroll-contain p-3 sm:p-4 space-y-3 chatbot-scroll-container pb-[max(1rem,env(safe-area-inset-bottom))]">
               <div className="flex items-center justify-between text-xs text-stone-600">
                 <span className="font-medium text-[#141416] tabular-nums">
                   {filteredInventory.length} Verified Properties
@@ -1015,15 +1031,16 @@ export default function PropertyAssistantModal({
                   {filteredInventory.map((prop) => {
                     const locality = prop.location?.locality || prop.locality || '';
                     const city = prop.location?.city || prop.city || '';
+                    const thumbUrl = prop.featuredImage || prop.images?.[0]?.url;
                     return (
                       <div
                         key={prop.id}
                         className="bg-white border border-[#E6E1D6] rounded-xl overflow-hidden shadow-2xs hover:border-[#B99A63]/60 transition-colors flex flex-col justify-between group"
                       >
                         <div className="relative aspect-[16/9] w-full bg-stone-200 overflow-hidden">
-                          {prop.featuredImage ? (
+                          {thumbUrl ? (
                             <Image
-                              src={prop.featuredImage}
+                              src={thumbUrl}
                               alt={prop.title}
                               fill
                               sizes="(max-width: 640px) 100vw, 440px"

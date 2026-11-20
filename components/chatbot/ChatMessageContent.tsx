@@ -35,10 +35,10 @@ function renderInlineContent(text: string, isUser = false, isDark = false) {
     if (linkText && linkUrl) {
       const isInternal = linkUrl.startsWith('/');
       const linkClass = isUser
-        ? 'text-[#FAF9F5] font-semibold underline underline-offset-2 hover:text-[#E8D39E] transition-colors inline-flex items-center gap-0.5 mx-0.5'
+        ? 'text-[#FAF9F5] font-semibold underline underline-offset-2 hover:text-[#E8D39E] transition-colors inline-flex items-center gap-0.5 mx-0.5 break-words [overflow-wrap:anywhere]'
         : isDark
-        ? 'text-[#E8D39E] font-semibold underline underline-offset-2 hover:text-white transition-colors inline-flex items-center gap-0.5 mx-0.5'
-        : 'text-[#845E1B] font-semibold underline underline-offset-2 hover:text-[#5E400F] transition-colors inline-flex items-center gap-0.5 mx-0.5';
+        ? 'text-[#E8D39E] font-semibold underline underline-offset-2 hover:text-white transition-colors inline-flex items-center gap-0.5 mx-0.5 break-words [overflow-wrap:anywhere]'
+        : 'text-[#845E1B] font-semibold underline underline-offset-2 hover:text-[#5E400F] transition-colors inline-flex items-center gap-0.5 mx-0.5 break-words [overflow-wrap:anywhere]';
 
       if (isInternal) {
         elements.push(
@@ -91,7 +91,7 @@ function renderInlineContent(text: string, isUser = false, isDark = false) {
       elements.push(
         <code
           key={`c-${matchIndex}`}
-          className={`font-mono text-[11px] px-1.5 py-0.5 rounded border mx-0.5 ${codeClass}`}
+          className={`font-mono text-[11px] px-1.5 py-0.5 rounded border mx-0.5 break-all ${codeClass}`}
         >
           {code}
         </code>
@@ -116,7 +116,11 @@ export default function ChatMessageContent({ content, isUser = false, isDark = f
   const blocks = content.split('\n\n').filter(Boolean);
 
   return (
-    <div className={`space-y-2 text-xs sm:text-sm leading-relaxed ${isUser ? 'text-[#FAF9F5]' : isDark ? 'text-stone-200' : 'text-[#222222]'}`}>
+    <div
+      className={`space-y-2 text-[13.5px] sm:text-sm leading-relaxed break-words min-w-0 ${
+        isUser ? 'text-[#FAF9F5]' : isDark ? 'text-stone-200' : 'text-[#222222]'
+      }`}
+    >
       {blocks.map((block, bIdx) => {
         const trimmed = block.trim();
 
@@ -126,9 +130,9 @@ export default function ChatMessageContent({ content, isUser = false, isDark = f
           return (
             <h4
               key={bIdx}
-              className={`font-serif font-bold text-sm sm:text-base pb-1 mt-1 border-b ${
-                isUser 
-                  ? 'text-[#FAF9F5] border-white/20' 
+              className={`font-serif font-bold text-sm sm:text-base pb-1 mt-1 border-b break-words ${
+                isUser
+                  ? 'text-[#FAF9F5] border-white/20'
                   : isDark
                   ? 'text-[#E8D39E] border-[#B99A63]/30'
                   : 'text-[#845E1B] border-[#B99A63]/30'
@@ -148,13 +152,15 @@ export default function ChatMessageContent({ content, isUser = false, isDark = f
 
         if (isListBlock && lines.length > 0) {
           return (
-            <ul key={bIdx} className="space-y-1.5 my-1.5 pl-1">
+            <ul key={bIdx} className="space-y-1.5 my-1.5 pl-0.5">
               {lines.filter(Boolean).map((line, lIdx) => {
                 const cleanLine = line.trim().replace(/^[•\-\*]\s+/, '').replace(/^\d+\.\s+/, '');
                 return (
-                  <li key={lIdx} className="flex items-start gap-2">
-                    <span className={`${isDark ? 'text-[#B99A63]' : 'text-[#845E1B]'} mt-1 shrink-0 text-xs`}>◆</span>
-                    <span className="flex-1">{renderInlineContent(cleanLine, isUser, isDark)}</span>
+                  <li key={lIdx} className="flex items-start gap-2 min-w-0">
+                    <span className={`${isDark ? 'text-[#B99A63]' : 'text-[#845E1B]'} mt-1 shrink-0 text-[10px]`}>◆</span>
+                    <span className="flex-1 min-w-0 break-words">
+                      {renderInlineContent(cleanLine, isUser, isDark)}
+                    </span>
                   </li>
                 );
               })}
@@ -164,7 +170,7 @@ export default function ChatMessageContent({ content, isUser = false, isDark = f
 
         // 3. Regular paragraph (may have single linebreaks inside)
         return (
-          <p key={bIdx} className="leading-relaxed">
+          <p key={bIdx} className="leading-relaxed break-words">
             {lines.map((line, lIdx) => (
               <React.Fragment key={lIdx}>
                 {renderInlineContent(line, isUser, isDark)}

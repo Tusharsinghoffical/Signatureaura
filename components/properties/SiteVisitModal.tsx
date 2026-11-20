@@ -14,7 +14,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { Property } from '@/types/real-estate';
-import { createStoredSiteVisit } from '@/lib/client-storage';
+import { createStoredSiteVisit, validateGenuineContact } from '@/lib/client-storage';
 import { createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
 
 interface SiteVisitModalProps {
@@ -58,8 +58,19 @@ export default function SiteVisitModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
     setErrorMsg('');
+
+    const check = validateGenuineContact(formData);
+    if (!check.valid) {
+      setErrorMsg(check.error || 'Please enter valid contact details.');
+      return;
+    }
+    if (!formData.visitDate) {
+      setErrorMsg('Please select a preferred visit date.');
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       createStoredSiteVisit({
