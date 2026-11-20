@@ -40,7 +40,22 @@ export default function createNextConfig(phase: string): NextConfig {
     },
     compress: true,
     poweredByHeader: false,
-    transpilePackages: ['motion'],
+    experimental: {
+      optimizePackageImports: ['lucide-react'],
+    },
+    async headers() {
+      return [
+        {
+          source: '/assets/:path*',
+          headers: [
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
+          ],
+        },
+      ];
+    },
     webpack: (config, { dev }) => {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
       // Do not modify—file watching is disabled to prevent flickering during agent edits.

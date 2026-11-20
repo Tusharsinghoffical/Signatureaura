@@ -36,7 +36,7 @@ function subscribeSaved(callback: () => void) {
   };
 }
 
-export default function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps) {
+function PropertyCard({ property, viewMode = 'grid' }: PropertyCardProps) {
   const savedRaw = React.useSyncExternalStore(subscribeSaved, getSavedSnapshot, () => '[]');
   const isSaved = React.useMemo(() => {
     try {
@@ -92,11 +92,11 @@ export default function PropertyCard({ property, viewMode = 'grid' }: PropertyCa
           {/* Badges / indicators */}
           <div className="absolute top-3 left-3 flex flex-col gap-1.5 pointer-events-none">
             {property.isFeatured && (
-              <span className="bg-[#171717]/90 text-[#FAF9F5] text-[10px] tracking-wider uppercase px-2 py-0.5 rounded font-medium backdrop-blur-xs">
+              <span className="bg-[#171717]/92 text-[#FAF9F5] text-[10px] tracking-wider uppercase px-2 py-0.5 rounded font-medium">
                 Signature Collection
               </span>
             )}
-            <span className="bg-[#B99A63]/90 text-white text-[10px] tracking-wider uppercase px-2 py-0.5 rounded font-medium backdrop-blur-xs">
+            <span className="bg-[#B99A63] text-white text-[10px] tracking-wider uppercase px-2 py-0.5 rounded font-medium">
               For {property.listingType === 'buy' ? 'Sale' : 'Lease'}
             </span>
           </div>
@@ -196,11 +196,12 @@ export default function PropertyCard({ property, viewMode = 'grid' }: PropertyCa
             src={primaryImage}
             alt={property.title}
             fill
+            quality={75}
             loading="lazy"
             placeholder="blur"
             blurDataURL={SHIMMER_BLUR_DATA_URL}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
             referrerPolicy="no-referrer"
           />
         </Link>
@@ -211,11 +212,11 @@ export default function PropertyCard({ property, viewMode = 'grid' }: PropertyCa
         {/* Badges */}
         <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 pointer-events-none">
           {property.isFeatured && (
-            <span className="bg-[#0D0D0F]/90 text-white border border-white/20 text-[10px] tracking-wider uppercase px-2.5 py-1 rounded font-medium backdrop-blur-md">
+            <span className="bg-[#0D0D0F]/92 text-white border border-white/20 text-[10px] tracking-wider uppercase px-2.5 py-1 rounded font-medium">
               Signature Trophy
             </span>
           )}
-          <span className="bg-[#D4AF37] text-[#0D0D0F] text-[10px] tracking-wider uppercase px-2.5 py-1 rounded font-bold backdrop-blur-xs">
+          <span className="bg-[#D4AF37] text-[#0D0D0F] text-[10px] tracking-wider uppercase px-2.5 py-1 rounded font-bold">
             For {property.listingType === 'buy' ? 'Sale' : 'Lease'}
           </span>
         </div>
@@ -224,20 +225,20 @@ export default function PropertyCard({ property, viewMode = 'grid' }: PropertyCa
         <button
           onClick={toggleSave}
           aria-label={isSaved ? "Remove from saved" : "Save property"}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#0D0D0F]/70 hover:bg-[#0D0D0F] text-white backdrop-blur-md flex items-center justify-center border border-white/15 transition-all shadow touch-manipulation z-10"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#0D0D0F]/85 hover:bg-[#0D0D0F] text-white flex items-center justify-center border border-white/15 transition-colors shadow touch-manipulation z-10"
         >
           <Heart className={`w-4 h-4 ${isSaved ? 'fill-[#D4AF37] text-[#D4AF37]' : 'text-stone-300'}`} />
         </button>
 
         {/* Price Tag Overlay with Champagne Gold Font */}
-        <div className="absolute bottom-3 left-3 bg-[#0D0D0F]/90 backdrop-blur-md border border-white/10 text-white px-3 py-1.5 rounded-lg shadow-md">
+        <div className="absolute bottom-3 left-3 bg-[#0D0D0F]/92 border border-white/10 text-white px-3 py-1.5 rounded-lg shadow-md">
           <span className="font-serif text-lg font-normal tracking-wide text-[#E8DFD0]">
             {property.priceDisplay}
           </span>
         </div>
 
         {/* Locality badge on right */}
-        <div className="absolute bottom-3 right-3 text-[11px] text-stone-200 bg-black/50 backdrop-blur-md px-2 py-1 rounded flex items-center gap-1">
+        <div className="absolute bottom-3 right-3 text-[11px] text-stone-200 bg-black/75 px-2 py-1 rounded flex items-center gap-1">
           <MapPin className="w-3 h-3 text-[#D4AF37]" />
           <span>{property.location.city}</span>
         </div>
@@ -300,3 +301,5 @@ export default function PropertyCard({ property, viewMode = 'grid' }: PropertyCa
     </div>
   );
 }
+
+export default React.memo(PropertyCard);

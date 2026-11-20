@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
@@ -28,10 +29,14 @@ import AnnouncementBar from '@/components/layout/AnnouncementBar';
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import FloatingContactSystem from '@/components/floating/FloatingContactSystem';
-import SiteVisitModal from '@/components/properties/SiteVisitModal';
 import PropertyCard from '@/components/properties/PropertyCard';
 import SharePageButton from '@/components/common/SharePageButton';
 import { SAMPLE_PROPERTIES } from '@/lib/data/sample-data';
+
+const SiteVisitModal = dynamic(
+  () => import('@/components/properties/SiteVisitModal'),
+  { ssr: false }
+);
 import { getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
 import { Property } from '@/types/real-estate';
 import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
@@ -806,12 +811,14 @@ export default function PropertyDetailClient({
         </div>
       )}
 
-      {/* Dedicated Site Visit Modal */}
-      <SiteVisitModal
-        isOpen={isSiteVisitOpen}
-        onClose={() => setIsSiteVisitOpen(false)}
-        property={property}
-      />
+      {/* Dedicated Site Visit Modal (loaded on demand) */}
+      {isSiteVisitOpen && (
+        <SiteVisitModal
+          isOpen={isSiteVisitOpen}
+          onClose={() => setIsSiteVisitOpen(false)}
+          property={property}
+        />
+      )}
     </div>
   );
 }

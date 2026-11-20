@@ -1,28 +1,35 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { 
-  Phone, 
-  MessageSquare, 
-  Mail, 
-  X, 
-  Send, 
-  Sparkles, 
-  CheckCircle2, 
-  Bot,
-  BotMessageSquare,
-  Calendar
+import {
+  Phone,
+  MessageSquare,
+  Mail,
+  X,
+  Send,
+  CheckCircle2,
+  BotMessageSquare
 } from 'lucide-react';
 import { BUSINESS_CONFIG, getWhatsAppLink, createWhatsAppRedirectUrl, redirectToWhatsApp } from '@/lib/config';
 import { createStoredLead, validateGenuineContact } from '@/lib/client-storage';
-import PropertyAssistantModal from '@/components/chatbot/PropertyAssistantModal';
+
+const PropertyAssistantModal = dynamic(
+  () => import('@/components/chatbot/PropertyAssistantModal'),
+  { ssr: false }
+);
 
 export default function FloatingContactSystem() {
   const pathname = usePathname();
   const [isCallbackModalOpen, setIsCallbackModalOpen] = useState(false);
   const [isChatModalOpen, setIsChatModalOpen] = useState(false);
+  const [hasOpenedChat, setHasOpenedChat] = useState(false);
+
+  const openChatModal = () => {
+    setHasOpenedChat(true);
+    setIsChatModalOpen(true);
+  };
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -133,7 +140,7 @@ export default function FloatingContactSystem() {
               Ask AI Property Assistant
             </div>
             <button
-              onClick={() => setIsChatModalOpen(true)}
+              onClick={openChatModal}
               aria-label="Ask AI Property Assistant"
               className="touch-manipulation w-13 h-13 min-w-[52px] min-h-[52px] rounded-full bg-[#171717] hover:bg-[#222222] text-[#B99A63] hover:text-[#D4AF37] flex items-center justify-center shadow-xl border border-[#B99A63]/80 hover:border-[#E8D39E] hover:scale-105 transition-all relative active:scale-95 group/btn"
             >
@@ -202,7 +209,7 @@ export default function FloatingContactSystem() {
         >
           {/* AI Assistant Floating Button */}
           <button
-            onClick={() => setIsChatModalOpen(true)}
+            onClick={openChatModal}
             aria-label="Open AI property assistant"
             className="touch-manipulation w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-[#171717] hover:bg-[#222222] border border-[#B99A63]/80 text-white flex items-center justify-center shadow-2xl active:scale-95 transition-transform relative"
           >
@@ -408,13 +415,15 @@ export default function FloatingContactSystem() {
       )}
 
       {/* =========================================================================
-          AI PROPERTY ASSISTANT MODAL
+          AI PROPERTY ASSISTANT MODAL (Loaded on demand)
          ========================================================================= */}
-      <PropertyAssistantModal
-        isOpen={isChatModalOpen}
-        onClose={() => setIsChatModalOpen(false)}
-        currentPropertyTitle={pagePropertyTitle}
-      />
+      {hasOpenedChat && (
+        <PropertyAssistantModal
+          isOpen={isChatModalOpen}
+          onClose={() => setIsChatModalOpen(false)}
+          currentPropertyTitle={pagePropertyTitle}
+        />
+      )}
     </>
   );
 }

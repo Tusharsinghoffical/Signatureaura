@@ -84,9 +84,12 @@ export default function AboutPage() {
         <section className="relative py-20 sm:py-24 bg-[#171717] text-white overflow-hidden">
           <div className="absolute inset-0 opacity-25">
             <Image
-              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=2000&q=80"
+              src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1200&q=75"
               alt="Architectural facade"
               fill
+              priority
+              quality={75}
+              sizes="100vw"
               className="object-cover"
               referrerPolicy="no-referrer"
             />

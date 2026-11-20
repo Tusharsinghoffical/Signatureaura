@@ -384,7 +384,7 @@ export default function ProjectDetailClient({
                             poster={vid.posterUrl}
                             controls
                             playsInline
-                            preload="metadata"
+                            preload="none"
                             className="w-full h-full object-cover"
                           />
                           <div className="pointer-events-none absolute top-2.5 left-2.5 bg-[#171717]/85 text-[#B99A63] text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded">

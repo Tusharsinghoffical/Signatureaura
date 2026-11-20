@@ -178,11 +178,12 @@ export default function HomePage() {
               alt="Luxury residence oceanfront"
               fill
               priority
+              fetchPriority="high"
               quality={75}
               placeholder="blur"
               blurDataURL={SHIMMER_BLUR_DATA_URL}
               sizes="100vw"
-              className="object-cover object-center opacity-65 scale-100 animate-in fade-in duration-700"
+              className="object-cover object-center opacity-65"
               referrerPolicy="no-referrer"
             />
             {/* Elegant gradient overlay for text legibility */}
@@ -192,7 +193,7 @@ export default function HomePage() {
           <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 lg:py-28 text-center flex flex-col items-center min-w-0">
             
             {/* Editorial kicker with SA Emblem */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20 text-stone-200 text-xs tracking-widest uppercase mb-4 sm:mb-6 shadow-md">
+            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 bg-white/10 rounded-full border border-white/20 text-stone-200 text-xs tracking-widest uppercase mb-4 sm:mb-6 shadow-md">
               <div className="relative w-7 h-7 sm:w-8 sm:h-8 shrink-0 drop-shadow-sm">
                 <Image
                   src="/assets/branding/signature-aura-logo-official.png?v=20261105"
@@ -200,7 +201,6 @@ export default function HomePage() {
                   fill
                   sizes="32px"
                   className="object-contain"
-                  priority
                 />
               </div>
               <span className="font-medium tracking-wider">Curated Indian Luxury Real Estate</span>
@@ -218,7 +218,7 @@ export default function HomePage() {
             </p>
 
             {/* Property Search Interface Card */}
-            <div className="w-full max-w-4xl mt-6 sm:mt-10 bg-white/95 backdrop-blur-md p-4 sm:p-6 rounded-2xl shadow-2xl border border-white/40 text-left min-w-0 box-border">
+            <div className="w-full max-w-4xl mt-6 sm:mt-10 bg-white/97 p-4 sm:p-6 rounded-2xl shadow-2xl border border-white/40 text-left min-w-0 box-border">
               
               {/* Category Selector Tabs (swipeable horizontal strip) */}
               <div className="flex items-center gap-1.5 sm:gap-2 border-b border-[#E8E5DF] pb-3 sm:pb-4 mb-4 overflow-x-auto scrollbar-none flex-nowrap w-full min-w-0">
@@ -383,7 +383,7 @@ export default function HomePage() {
         {/* =========================================================================
             9. EXPLORE BY PROPERTY TYPE
            ========================================================================= */}
-        <section className="py-16 bg-[#F5F3EF] border-y border-[#E8E5DF]">
+        <section className="cv-auto py-16 bg-[#F5F3EF] border-y border-[#E8E5DF]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-12">
               <span className="text-xs font-semibold tracking-widest text-[#B99A63] uppercase">
@@ -490,7 +490,7 @@ export default function HomePage() {
         {/* =========================================================================
             10. POPULAR LOCATIONS
            ========================================================================= */}
-        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="cv-auto py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
             <div>
               <span className="text-xs font-semibold tracking-widest text-[#B99A63] uppercase">
@@ -563,7 +563,7 @@ export default function HomePage() {
         {/* =========================================================================
             13. FEATURED PROJECTS AND DEVELOPMENTS
            ========================================================================= */}
-        <section className="py-20 bg-[#171717] text-white">
+        <section className="cv-auto py-20 bg-[#171717] text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-12">
               <div>
@@ -721,7 +721,7 @@ export default function HomePage() {
         {/* =========================================================================
             15. STATISTICS SECTION
            ========================================================================= */}
-        <section className="py-16 bg-[#FAF9F5] border-b border-[#E8E5DF]">
+        <section className="cv-auto py-16 bg-[#FAF9F5] border-b border-[#E8E5DF]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center">
               
@@ -772,7 +772,7 @@ export default function HomePage() {
         {/* =========================================================================
             11. WHY CHOOSE OUR COMPANY & 12. ABOUT SECTION
            ========================================================================= */}
-        <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="cv-auto py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             
             {/* Left Image Collage */}
@@ -889,7 +889,7 @@ export default function HomePage() {
         {/* =========================================================================
             13.B FOUNDING PARTNERS & LEADERSHIP
            ========================================================================= */}
-        <section className="py-20 bg-white border-t border-[#E8E5DF]">
+        <section className="cv-auto py-20 bg-white border-t border-[#E8E5DF]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-14">
               <div>
@@ -974,7 +974,7 @@ export default function HomePage() {
         {/* =========================================================================
             14. TESTIMONIALS SECTION
            ========================================================================= */}
-        <section className="py-20 bg-[#F5F3EF] border-t border-[#E8E5DF]">
+        <section className="cv-auto py-20 bg-[#F5F3EF] border-t border-[#E8E5DF]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <span className="text-xs font-semibold tracking-widest text-[#B99A63] uppercase">
@@ -1023,7 +1023,7 @@ export default function HomePage() {
         {/* =========================================================================
             16. CALL-TO-ACTION & 17. CONTACT SECTION
            ========================================================================= */}
-        <section className="py-20 bg-white">
+        <section className="cv-auto py-20 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="bg-[#171717] text-white rounded-2xl p-8 sm:p-12 lg:p-16 shadow-2xl relative overflow-hidden">
               

@@ -308,7 +308,7 @@ export default function RootLayout({
         <SpeedInsights />
 
         {/* First-Party Attribution & Conversion Tracking Pixel */}
-        <script src="/pixel.js" defer />
+        <Script src="/pixel.js" strategy="lazyOnload" />
       </body>
     </html>
   );

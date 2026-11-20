@@ -31,7 +31,7 @@ export default function Footer() {
                   fill
                   sizes="(max-width: 640px) 64px, (max-width: 1024px) 80px, 96px"
                   className="object-contain"
-                  priority
+                  loading="lazy"
                 />
               </div>
               <div className="flex flex-col justify-center">

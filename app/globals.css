@@ -167,3 +167,9 @@
   align-items: center;
 }
 
+/* Defer off-screen rendering for below-the-fold sections */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 560px;
+}
+
